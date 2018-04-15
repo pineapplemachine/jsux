@@ -41,9 +41,7 @@
             if(value !== this.currentValue){
                 this.currentValue = value;
                 updateClass("uxToggleButtonActive", value, this.rootElement);
-                if(this.onchange){
-                    this.onchange(value);
-                }
+                this.handleEvent("change", value);
             }
         }
         get text(){
@@ -55,7 +53,6 @@
         constructor(options = {}){
             super(options);
             this.options = options;
-            this.onchange = options.onchange;
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxToggleButton",
