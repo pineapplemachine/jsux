@@ -1,0 +1,368 @@
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <html>
+        <head>
+            <title>jsux example</title>
+            <!-- Apply default styling -->
+            <link rel="import" href="default-theme.html">
+            <!-- Import a bunch of UI elements -->
+            <link rel="import" href="button.html">
+            <link rel="import" href="checkbox.html">
+            <link rel="import" href="color-picker.html">
+            <link rel="import" href="div.html">
+            <link rel="import" href="drop-down.html">
+            <link rel="import" href="edit-field.html">
+            <link rel="import" href="html.html">
+            <link rel="import" href="hyperlink.html">
+            <link rel="import" href="list.html">
+            <link rel="import" href="panel.html">
+            <link rel="import" href="radio.html">
+            <link rel="import" href="radio-group.html">
+            <link rel="import" href="radio-section.html">
+            <link rel="import" href="search-list.html">
+            <link rel="import" href="scroll-list.html">
+            <link rel="import" href="scroll-section.html">
+            <link rel="import" href="section.html">
+            <link rel="import" href="slider.html">
+            <link rel="import" href="spinner.html">
+            <link rel="import" href="tabs.html">
+            <link rel="import" href="text.html">
+            <link rel="import" href="text-area.html">
+            <link rel="import" href="text-field.html">
+            <link rel="import" href="thumbs.html">
+            <link rel="import" href="toggle-button.html">
+            <link rel="import" href="toolbar.html">
+        </head>
+        <body style='background-color: #040404; overflow: hidden; margin: 0;'>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Grand_star-forming_region_R136_in_NGC_2070_%28captured_by_the_Hubble_Space_Telescope%29.jpg/752px-Grand_star-forming_region_R136_in_NGC_2070_%28captured_by_the_Hubble_Space_Telescope%29.jpg" style='
+                position: absolute;
+                width: 100vw;
+                height: 100vh;
+                opacity: 0.6;
+            '>
+            <script>
+                const checksTab = new UxTab({
+                    title: "Clicky",
+                }).add([
+                    new UxToolbar({
+                        items: [
+                            {
+                                src: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Folder-new.svg/48px-Folder-new.svg.png",
+                                title: "New folder",
+                                onleftclick: event => {
+                                    console.log("New folder", event);
+                                },
+                            },
+                            {
+                                src: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Internet-web-browser.svg/48px-Internet-web-browser.svg.png",
+                                title: "The GLOBE",
+                                onleftclick: event => {
+                                    console.log("Globe", event);
+                                },
+                            },
+                            {
+                                src: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Office-calendar.svg/48px-Office-calendar.svg.png",
+                                title: "Calendar",
+                                onleftclick: event => {
+                                    console.log("Calendar", event);
+                                },
+                            },
+                            {
+                                src: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Mail-mark-junk.svg/48px-Mail-mark-junk.svg.png",
+                                title: "Garbage",
+                                onleftclick: event => {
+                                    console.log("Garbage", event);
+                                },
+                            },
+                        ],
+                    }),
+                    new UxCheckbox({
+                        title: "Checkbox #1 ☃",
+                        attribute: "check1",
+                        tooltip: "Test tooltip",
+                    }),
+                    new UxCheckbox({
+                        title: "Checkbox #2",
+                        attribute: "check2",
+                        id: "check2",
+                    }),
+                    new UxText({
+                        text: "First radio group",
+                    }),
+                    new UxRadio({
+                        title: "Radio #1",
+                        attribute: "radio1",
+                        group: "Radios",
+                    }),
+                    new UxRadio({
+                        title: "Radio #2",
+                        attribute: "radio2",
+                        group: "Radios",
+                    }),
+                    new UxRadio({
+                        title: "Radio #3",
+                        attribute: "radio3",
+                        group: "Radios",
+                    }),
+                    new UxText({
+                        text: "Second radio group",
+                    }),
+                    new UxRadioGroup({
+                        attribute: "radioGroup",
+                        id: "radioGroup",
+                        items: [
+                            {
+                                title: "Radio in group #1",
+                                value: 1,
+                            },
+                            {
+                                title: "Radio in group #2",
+                                value: 2,
+                            },
+                            {
+                                title: "Radio in group #3",
+                                value: 3,
+                            },
+                        ],
+                    }),
+                    new UxRadioSection({
+                        title: "Third radio group",
+                        attribute: "radioSection",
+                        id: "radioSection",
+                        items: [
+                            {
+                                title: "Radio in section #1",
+                                value: 1,
+                            },
+                            {
+                                title: "Radio in section #2",
+                                value: 2,
+                            },
+                            {
+                                title: "Radio in section #3",
+                                value: 3,
+                            },
+                        ],
+                    }),
+                    new UxButton({
+                        text: "Click me!",
+                        onleftclick: event => {
+                            console.log("Button was clicked", event);
+                        },
+                    }),
+                    new UxToggleButton({
+                        text: "Toggle me!",
+                    }),
+                    new UxEditField({
+                        title: "Edit field",
+                        value: "Example value",
+                        onedit: event => {
+                            console.log("Edit button was clicked", event);
+                        },
+                    }),
+                ]);
+                
+                const slidersTab = new UxTab({
+                    title: "Sliders",
+                }).add([
+                    new UxSlider({
+                        attribute: "sliderNone",
+                    }),
+                    new UxSlider({
+                        attribute: "sliderLeft",
+                        titleLeft: "left",
+                    }),
+                    new UxSlider({
+                        attribute: "sliderRight",
+                        titleRight: "right",
+                    }),
+                    new UxSlider({
+                        attribute: "sliderBoth",
+                        titleLeft: "left",
+                        titleRight: "right",
+                    }),
+                    new UxColorPicker({
+                        attribute: "colorPicker",
+                    }),
+                ]);
+                
+                const textTab = new UxTab({
+                    title: "Text",
+                }).add([
+                    new UxText({
+                        text: "Some text",
+                    }),
+                    new UxHyperlink({
+                        title: "Some hyperlink",
+                        url: "google.com",
+                    }),
+                    new UxHtml({
+                        html: "<em>Italic HTML thing</em",
+                        style: {lineHeight: "30px"},
+                    }),
+                    new UxSpinner({
+                        attribute: "spinnerNoTitle",
+                        unit: "units",
+                    }),
+                    new UxSpinner({
+                        attribute: "spinnerNoTitle",
+                        title: "Spinner with title",
+                    }),
+                    new UxTextField({
+                        attribute: "textFieldNoTitle",
+                        placeholder: "Placeholder A",
+                    }),
+                    new UxTextField({
+                        attribute: "textFieldWithTitle",
+                        title: "Text input with title",
+                        placeholder: "Placeholder B",
+                    }),
+                    new UxTextArea({
+                        attribute: "textArea",
+                        placeholder: "This is a text area",
+                    }),
+                    new UxScrollSection({
+                        title: "Srolling section with text",
+                        style: {height: "150px"},
+                    }).add(new UxText({
+                        text: Array(50).fill("lorem impsum").join(" "),
+                    })),
+                    new UxSection({
+                        title: "Collapsing section",
+                        collapsible: true,
+                        style: {content: {height: "60px"}},
+                    }).add(new UxText({
+                        text: "This right here is some sample text, how neat!",
+                    })),
+                ]);
+                
+                const longListItems = [];
+                for(let i = 0; i < 40; i++){
+                    longListItems.push({title: `Option #${i}`, value: i});
+                }
+                
+                const listsTab = new UxTab({
+                    title: "Lists",
+                }).add([
+                    new UxList({
+                        id: "plainList",
+                        attribute: "plainList",
+                        items: [
+                            {
+                                title: "Option A",
+                                value: "A",
+                            },
+                            {
+                                title: "Option B",
+                                value: "B",
+                            },
+                            {
+                                title: "Option C",
+                                value: "C",
+                            },
+                            {
+                                title: "Option D",
+                                value: "D",
+                            },
+                        ],
+                    }),
+                    new UxScrollList({
+                        id: "scrollList",
+                        attribute: "scrollList",
+                        items: longListItems,
+                        style: {
+                            height: "180px",
+                        },
+                    }),
+                    new UxSearchList({
+                        id: "searchList",
+                        attribute: "searchList",
+                        items: longListItems,
+                        style: {
+                            height: "180px",
+                        },
+                    }),
+                    new UxThumbs({
+                        attribute: "thumbs",
+                        items: [
+                            {
+                                src: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Go-home.svg/48px-Go-home.svg.png",
+                                value: "home",
+                            },
+                            {
+                                src: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Preferences-desktop-screensaver.svg/48px-Preferences-desktop-screensaver.svg.png",
+                                value: "screensaver",
+                            },
+                            {
+                                src: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Video-x-generic.svg/48px-Video-x-generic.svg.png",
+                                value: "media-reel",
+                            },
+                            {
+                                src: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Applications-games.svg/48px-Applications-games.svg.png",
+                                value: "cards",
+                            },
+                            {
+                                src: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Preferences-desktop-font.svg/48px-Preferences-desktop-font.svg.png",
+                                value: "letters",
+                            },
+                        ],
+                    }),
+                    new UxDropDown({
+                        attribute: "dropdownNoTitle",
+                        items: [
+                            {
+                                title: "Option A",
+                                value: "A",
+                            },
+                            {
+                                title: "Option B",
+                                value: "B",
+                            },
+                            {
+                                title: "Option C",
+                                value: "C",
+                            },
+                        ],
+                    }),
+                    new UxDropDown({
+                        title: "With title",
+                        attribute: "dropdownWithTitle",
+                        items: [
+                            {
+                                title: "Option A",
+                                value: "A",
+                            },
+                            {
+                                title: "Option B",
+                                value: "B",
+                            },
+                            {
+                                title: "Option C",
+                                value: "C",
+                            },
+                        ],
+                    }),
+                ]);
+                
+                const panel = new UxPanel({
+                    title: "Example panel",
+                    hideable: true,
+                    collapsible: true,
+                    draggable: true,
+                    addToBody: true,
+                    style: {
+                        width: "480px",
+                    },
+                }).add([
+                    new UxTabs().add([
+                        checksTab,
+                        slidersTab,
+                        textTab,
+                        listsTab,
+                    ]),
+                ]);
+                
+                panel.center();
+            </script>
+        </body>
+    </html>
+</meta>
