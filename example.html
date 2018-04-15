@@ -44,6 +44,7 @@
                     title: "Clicky",
                 }).add([
                     new UxToolbar({
+                        id: "toolbar",
                         items: [
                             {
                                 src: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Folder-new.svg/48px-Folder-new.svg.png",
@@ -147,9 +148,14 @@
                         },
                     }),
                     new UxToggleButton({
+                        id: "toggleButton",
                         text: "Toggle me!",
+                        onchange: event => {
+                            console.log("Changed toggle button state", event);
+                        },
                     }),
                     new UxEditField({
+                        id: "editField",
                         title: "Edit field",
                         value: "Example value",
                         onedit: event => {
@@ -186,14 +192,17 @@
                     title: "Text",
                 }).add([
                     new UxText({
+                        id: "someText",
                         text: "Some text",
                     }),
                     new UxHyperlink({
+                        id: "someHyperlink",
                         title: "Some hyperlink",
                         url: "google.com",
                     }),
                     new UxHtml({
-                        html: "<em>Italic HTML thing</em",
+                        id: "italicThing",
+                        html: "<em>Italic HTML thing</em>",
                         style: {lineHeight: "30px"},
                     }),
                     new UxSpinner({
