@@ -64,7 +64,7 @@
         constructor(options = {}){
             super(options);
             this.options = options;
-            this.textFieldElement = new UxTextField();
+            this.textFieldElement = this.inElementTree(new UxTextField());
             this.textFieldElement.element.classList.add("uxSearchInput");
             this.title = options.title;
             this.placeholder = options.placeholder || "Search...";

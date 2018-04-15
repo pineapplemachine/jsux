@@ -68,13 +68,13 @@
         addItem(options){
             const radio = new UxRadio(options);
             radio.group = this.group;
-            radio.onchange = value => {
+            radio.addEventListener("change", value => {
                 if(value){
                     this.selectedItem = radio;
                 }else{
                     this.selectedItem = undefined;
                 }
-            };
+            });
             return this.addOne(radio);
         }
     }

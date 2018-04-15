@@ -77,12 +77,11 @@
                     }),
                     new UxCheckbox({
                         title: "Checkbox #1 ☃",
-                        attribute: "check1",
+                        id: "check1",
                         tooltip: "Test tooltip",
                     }),
                     new UxCheckbox({
                         title: "Checkbox #2",
-                        attribute: "check2",
                         id: "check2",
                     }),
                     new UxText({
@@ -90,24 +89,23 @@
                     }),
                     new UxRadio({
                         title: "Radio #1",
-                        attribute: "radio1",
+                        id: "radio1",
                         group: "Radios",
                     }),
                     new UxRadio({
                         title: "Radio #2",
-                        attribute: "radio2",
+                        id: "radio2",
                         group: "Radios",
                     }),
                     new UxRadio({
                         title: "Radio #3",
-                        attribute: "radio3",
+                        id: "radio3",
                         group: "Radios",
                     }),
                     new UxText({
                         text: "Second radio group",
                     }),
                     new UxRadioGroup({
-                        attribute: "radioGroup",
                         id: "radioGroup",
                         items: [
                             {
@@ -126,7 +124,6 @@
                     }),
                     new UxRadioSection({
                         title: "Third radio group",
-                        attribute: "radioSection",
                         id: "radioSection",
                         items: [
                             {
@@ -165,23 +162,23 @@
                     title: "Sliders",
                 }).add([
                     new UxSlider({
-                        attribute: "sliderNone",
+                        id: "sliderNone",
                     }),
                     new UxSlider({
-                        attribute: "sliderLeft",
+                        id: "sliderLeft",
                         titleLeft: "left",
                     }),
                     new UxSlider({
-                        attribute: "sliderRight",
+                        id: "sliderRight",
                         titleRight: "right",
                     }),
                     new UxSlider({
-                        attribute: "sliderBoth",
+                        id: "sliderBoth",
                         titleLeft: "left",
                         titleRight: "right",
                     }),
                     new UxColorPicker({
-                        attribute: "colorPicker",
+                        id: "colorPicker",
                     }),
                 ]);
                 
@@ -200,24 +197,24 @@
                         style: {lineHeight: "30px"},
                     }),
                     new UxSpinner({
-                        attribute: "spinnerNoTitle",
+                        id: "spinnerNoTitle",
                         unit: "units",
                     }),
                     new UxSpinner({
-                        attribute: "spinnerNoTitle",
+                        id: "spinnerNoTitle",
                         title: "Spinner with title",
                     }),
                     new UxTextField({
-                        attribute: "textFieldNoTitle",
+                        id: "textFieldNoTitle",
                         placeholder: "Placeholder A",
                     }),
                     new UxTextField({
-                        attribute: "textFieldWithTitle",
+                        id: "textFieldWithTitle",
                         title: "Text input with title",
                         placeholder: "Placeholder B",
                     }),
                     new UxTextArea({
-                        attribute: "textArea",
+                        id: "textArea",
                         placeholder: "This is a text area",
                     }),
                     new UxScrollSection({
@@ -245,7 +242,6 @@
                 }).add([
                     new UxList({
                         id: "plainList",
-                        attribute: "plainList",
                         items: [
                             {
                                 title: "Option A",
@@ -267,7 +263,6 @@
                     }),
                     new UxScrollList({
                         id: "scrollList",
-                        attribute: "scrollList",
                         items: longListItems,
                         style: {
                             height: "180px",
@@ -275,14 +270,13 @@
                     }),
                     new UxSearchList({
                         id: "searchList",
-                        attribute: "searchList",
                         items: longListItems,
                         style: {
                             height: "180px",
                         },
                     }),
                     new UxThumbs({
-                        attribute: "thumbs",
+                        id: "thumbs",
                         items: [
                             {
                                 src: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Go-home.svg/48px-Go-home.svg.png",
@@ -307,7 +301,7 @@
                         ],
                     }),
                     new UxDropDown({
-                        attribute: "dropdownNoTitle",
+                        id: "dropdownNoTitle",
                         items: [
                             {
                                 title: "Option A",
@@ -325,7 +319,7 @@
                     }),
                     new UxDropDown({
                         title: "With title",
-                        attribute: "dropdownWithTitle",
+                        id: "dropdownWithTitle",
                         items: [
                             {
                                 title: "Option A",

@@ -110,9 +110,9 @@
         constructor(options = {}){
             super(options);
             this.options = options;
-            this.scrollAreaElement = new UxScrollArea();
+            this.scrollAreaElement = this.inElementTree(new UxScrollArea());
             this.scrollAreaElement.element.classList.add("uxScrollList");
-            this.listElement = new UxList();
+            this.listElement = this.inElementTree(new UxList());
             this.listElement.addEventListener("activecursorup", itemElement => {
                 this.scrollTo(itemElement && itemElement.element);
             });

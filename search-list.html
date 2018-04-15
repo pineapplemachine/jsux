@@ -137,30 +137,29 @@
         constructor(options = {}){
             super(options);
             this.options = options;
-            this.listElement = new UxScrollList();
-            this.searchInputElement = new UxSearchInput({
-                oninput: event => {
-                    this.listElement.search(this.searchString);
-                },
-                onkeydown: event => {
-                    if(event.key === "ArrowUp" || event.key === "ArrowDown"){
-                        this.handleActiveCursorKeyEvent(event);
-                        return false;
-                    }else if(event.key === "Enter"){
-                        // If exactly one item is visible and it
-                        // isn't already selected, select it now
-                        if(!this.activeItem){
-                            const visible = this.getVisibleChildren();
-                            if(visible.length === 1){
-                                this.activeItem = visible[0];
-                            }
+            this.listElement = this.inElementTree(new UxScrollList());
+            this.searchInputElement = this.inElementTree(new UxSearchInput());
+            this.searchInputElement.addEventListener("input", event => {
+                this.listElement.search(this.searchString);
+            });
+            this.searchInputElement.addEventListener("keydown", event => {
+                if(event.key === "ArrowUp" || event.key === "ArrowDown"){
+                    this.handleActiveCursorKeyEvent(event);
+                    return false;
+                }else if(event.key === "Enter"){
+                    // If exactly one item is visible and it
+                    // isn't already selected, select it now
+                    if(!this.activeItem){
+                        const visible = this.getVisibleChildren();
+                        if(visible.length === 1){
+                            this.activeItem = visible[0];
                         }
-                        if(this.activeItem){
-                            this.select(this.activeItem);
-                        }
-                        return false;
                     }
-                },
+                    if(this.activeItem){
+                        this.select(this.activeItem);
+                    }
+                    return false;
+                }
             });
             this.rootElement = createElement({
                 tag: "div",

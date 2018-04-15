@@ -80,25 +80,6 @@
                 }
             }
         }
-        setFormObjects(childrenById, childrenByAttribute){
-            if(childrenById !== this.childrenById){
-                for(let key in this.childrenById){
-                    childrenById[key] = this.childrenById[key];
-                }
-                this.childrenById = childrenById;
-            }
-            if(childrenByAttribute !== this.childrenByAttribute){
-                for(let key in this.childrenByAttribute){
-                    childrenByAttribute[key] = this.childrenByAttribute[key];
-                }
-                this.childrenByAttribute = childrenByAttribute;
-            }
-            if(this.children){
-                for(let child of this.children){
-                    child.setFormObjects(childrenById, childrenByAttribute);
-                }
-            }
-        }
         get tooltip(){
             return this.tooltipObject && this.tooltipObject.text;
         }
@@ -211,48 +192,57 @@
                 }
             }
         }
+        joinElementTree(element){
+            if(element){
+                return element.inElementTree(this);
+            }
+        }
+        inElementTree(element){
+            if(!element){
+                return;
+            }
+            if(element.id){
+                this.elementsById[element.id] = element;
+            }
+            if(element.elementsById &&
+                element.elementsById !== this.elementsById
+            ){
+                for(let key in element.elementsById){
+                    this.elementsById[key] = element.elementsById[key];
+                }
+            }
+            element.elementsById = this.elementsById;
+            if(element.children){
+                for(let child of element.children){
+                    this.inElementTree(child);
+                }
+            }
+            return element;
+        }
     }
     
     class UxContainerElement extends UxElement{
         constructor(options){
             super(options);
-            if(!("children" in this)){
-                this.children = [];
-            }
-            this.childrenById = {};
-            this.childrenByAttribute = {};
-            // TODO: do this better
-            if(!("value" in this)){
-                this.value = this.getValueProxyObject();
-            }
-            this.child = this.getChildProxyObject();
+            // Some elements might have a getter that forwards to a another
+            // element's children instead of having their own list
+            if(!("children" in this)) this.children = [];
+            this.elementsById = {};
         }
         get childContainerElement(){
             return this.rootElement;
         }
-        getValueProxyObject(){
-            return new Proxy({}, {
-                get: (target, name) => {
-                    const element = this.childrenByAttribute[name];
-                    return element && element.value;
-                },
-                set: (target, name, value) => {
-                    const element = this.childrenByAttribute[name];
-                    return element && (element.value = value);
-                },
-            });
+        get find(){
+            return this.elementsById;
         }
-        getChildProxyObject(){
-            return new Proxy({}, {
-                get: (target, name) => {
-                    return this.childrenById[name];
-                },
-            });
+        getValueOf(id){
+            const element = this.elementsById && this.elementsById[id];
+            return element && element.value;
         }
-        getValues(){
+        getValuesObject(){
             const result = {};
-            for(let attribute in this.childrenByAttribute){
-                result[attribute] = this.childrenByAttribute[attribute].value;
+            for(let attribute in this.elementsById){
+                result[attribute] = this.elementsById[attribute].value;
             }
             return result;
         }
@@ -294,17 +284,9 @@
             if(child.prevSibling){
                 child.prevSibling.nextSibling = child;
             }
-            child.setFormObjects(
-                this.childrenById, this.childrenByAttribute
-            );
+            this.inElementTree(child);
             if(this.childContainerElement && child.element){
                 this.childContainerElement.appendChild(child.element);
-            }
-            if(child.id){
-                this.childrenById[child.id] = child;
-            }
-            if(child.attribute && "value" in child){
-                this.childrenByAttribute[child.attribute] = child;
             }
             return this;
         }
@@ -334,10 +316,7 @@
                 child.stitchSiblings();
                 this.childContainerElement.removeChild(child.element);
                 if(child.id){
-                    delete this.childrenById[child.id];
-                }
-                if(child.attribute){
-                    delete this.childrenByAttribute[child.attribute];
+                    delete this.elementsById[child.id];
                 }
             }
         }

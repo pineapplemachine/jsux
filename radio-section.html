@@ -39,15 +39,15 @@
         constructor(options = {}){
             super(options);
             this.options = options;
-            this.sectionElement = new UxSection({
+            this.sectionElement = this.inElementTree(new UxSection({
                 title: options.title,
                 tooltip: options.tooltip,
-            });
-            this.radioGroupElement = new UxRadioGroup({
+            }));
+            this.radioGroupElement = this.inElementTree(new UxRadioGroup({
                 value: options.value,
                 group: options.group,
                 items: options.items,
-            });
+            }));
             this.sectionElement.add(this.radioGroupElement);
             // Set style
             this.setStyle(options.style);

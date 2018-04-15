@@ -68,8 +68,8 @@
         constructor(options = {}){
             super(options);
             this.options = options;
-            this.sectionElement = new UxSection(options);
-            this.scrollAreaElement = new UxScrollArea();
+            this.sectionElement = this.inElementTree(new UxSection(options));
+            this.scrollAreaElement = this.inElementTree(new UxScrollArea());
             this.sectionElement.element.classList.add("uxScrollSection");
             this.sectionElement.add(this.scrollAreaElement);
             // Set style
