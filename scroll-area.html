@@ -1,0 +1,151 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+<link rel="import" href="tooltip.html">
+
+<link rel="import" href="slider-helper.html">
+
+<script>
+    
+    class UxScrollArea extends UxContainerElement{
+        static css(theme){
+            return `
+            .uxScrollArea {
+                display: block;
+                position: relative;
+                overflow: hidden;
+            }
+            .uxScrollAreaContent {
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: ${theme.scrollBarWidth}px;
+            }
+            .uxScrollAreaScrollBar {
+                display: block;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                right: 0;
+                width: ${theme.scrollBarWidth}px;
+                background-color: ${theme.middleground};
+            }
+            .uxScrollAreaCursor {
+                position: relative;
+                display: block;
+                margin-left: 1px;
+                width: ${theme.scrollBarWidth - 1}px;
+                height: ${theme.scrollBarWidth * 4}px;
+                border-radius: ${theme.scrollBarWidth / 2}px;
+                background-color: ${theme.middlegroundLight};
+            }
+            `;
+        }
+        get childContainerElement(){
+            return this.contentElement;
+        }
+        get scroll(){
+            return this.scrollSlider.value;
+        }
+        set scroll(value){
+            this.scrollSlider.value = value;
+        }
+        get scrollHeight(){
+            return (
+                this.contentElement.scrollHeight -
+                this.getVisibleContentHeight()
+            );
+        }
+        getVisibleContentHeight(){
+            return this.rootElement.clientHeight;
+        }
+        scrollTo(element){
+            if(!element){
+                return;
+            }
+            const visibleHeight = this.getVisibleContentHeight();
+            const maxVisibleY = visibleHeight - element.offsetHeight;
+            const position = element.offsetTop - this.scroll;
+            // When the target is totally out of view, scroll so that
+            // it's centered in the view
+            if(
+                position < -element.offsetHeight ||
+                position > maxVisibleY + element.offsetHeight
+            ){
+                this.scroll = element.offsetTop - (
+                    visibleHeight / 2 - element.offsetHeight / 2
+                );
+            // When it's just above the view area, only scroll up enough to
+            // make it fully visible
+            }else if(position < 0){
+                this.scroll = element.offsetTop;
+            // When it's just below the view area, only scroll down enough
+            // to make it fully visible
+            }else if(position > maxVisibleY){
+                this.scroll = element.offsetTop - maxVisibleY;
+            }
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.contentElement, style && style.content);
+            styleElement(this.scrollBarElement, style && style.scrollBar);
+            styleElement(this.scrollCursorElement, style && style.scrollCursor);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.contentElement = createElement({
+                tag: "div",
+                class: "uxScrollAreaContent",
+            });
+            this.scrollCursorElement = createElement({
+                tag: "div",
+                class: "uxScrollAreaCursor",
+            });
+            this.scrollBarElement = createElement({
+                tag: "div",
+                class: "uxScrollAreaScrollBar",
+                children: [this.scrollCursorElement],
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxScrollArea",
+                children: [
+                    this.titleElement,
+                    this.scrollBarElement,
+                    this.contentElement,
+                ],
+                onwheel: event => {
+                    const listen = this.handleEvent("wheel", event);
+                    if(listen === false){
+                        return listen;
+                    }else if(event.deltaY){
+                        this.scroll = this.scroll + event.deltaY;
+                        // https://stackoverflow.com/a/23606063
+                        return false;
+                    }
+                },
+            });
+            this.scrollSlider = new Slider({
+                vertical: true,
+                value: 0,
+                container: this.scrollBarElement,
+                cursor: this.scrollCursorElement,
+                minValue: () => 0,
+                maxValue: () => this.scrollHeight,
+                onchange: (value, position) => {
+                    this.contentElement.style.top = -value;
+                    this.scrollCursorElement.style.top = position;
+                },
+            });
+            if(options.scroll){
+                this.scroll = options.scroll;
+            }
+            // Set style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

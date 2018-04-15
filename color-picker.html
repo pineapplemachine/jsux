@@ -1,0 +1,244 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<link rel="import" href="color.html">
+
+<script>
+
+    class UxColorPicker extends UxElement{
+        static css(theme){
+            return `
+            .uxColorPicker {
+                display: block;
+                position: relative;
+                height: 60px;
+                margin: ${theme.elementMargin};
+            }
+            .uxColorPickerPreview{
+                display: block;
+                position: relative;
+                margin: 0;
+                top: 2px;
+                width: 56px;
+                height: 56px;
+                box-sizing: border-box;
+                border-style: solid;
+                border-width: 1px;
+                border-color: ${theme.foreground};
+                border-radius: 2px;
+                order: 10;
+            }
+            .uxColorPickerPreviewHex {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                display: none;
+                width: 100%;
+                text-align: center;
+                font-size: 11px;
+                line-height: 16px;
+                background-color: ${theme.middlegroundDark};
+            }
+            .uxColorPicker:hover > .uxColorPickerPreview > .uxColorPickerPreviewHex {
+                display: block;
+            }
+            .uxColorPicker:active > .uxColorPickerPreview > .uxColorPickerPreviewHex {
+                display: block;
+            }
+            .uxColorPickerCursor {
+                display: block;
+                width: 12px;
+                height: 12px;
+                margin-top: -1px;
+                margin-left: -1px;
+                background-color: transparent;
+                box-sizing: border-box;
+                border-style: solid;
+                border-width: 2px;
+                border-color: ${theme.foreground};
+                border-bottom-color: ${theme.middleground};
+                border-radius: 2px;
+                cursor: pointer;
+            }
+            .uxColorPickerSlider {
+                display: block;
+                position: absolute;
+                right: 0px;
+                width: calc(100% - 70px);
+                height: 12px;
+                box-sizing: border-box;
+                border-style: solid;
+                border-width: 1px;
+                border-radius: 2px;
+                cursor: pointer;
+            }
+            .uxColorPickerSliderRed{
+                background-color: #c11;
+                background: linear-gradient(to right, #000, #f00);
+                border-color: #522;
+                top: 2px;
+            }
+            .uxColorPickerSliderGreen{
+                background-color: #1c1;
+                background: linear-gradient(to right, #000, #0f0);
+                border-color: #252;
+                top: 24px;
+            }
+            .uxColorPickerSliderBlue{
+                background-color: #11c;
+                background: linear-gradient(to right, #000, #00f);
+                border-color: #225;
+                bottom: 2px;
+            }
+            `;
+        }
+        get value(){
+            return new UxColor(this.red, this.green, this.blue);
+        }
+        set value(value){
+            const channels = new UxColor(value);
+            this.red = channels.red;
+            this.green = channels.green;
+            this.blue = channels.blue;
+        }
+        get red(){
+            return this.redSlider.value;
+        }
+        set red(value){
+            this.redSlider.value = value;
+        }
+        get green(){
+            return this.greenSlider.value;
+        }
+        set green(value){
+            this.greenSlider.value = value;
+        }
+        get blue(){
+            return this.blueSlider.value;
+        }
+        set blue(value){
+            this.blueSlider.value = value;
+        }
+        updatePreviewColor(){
+            const hexColor = this.value;
+            this.previewElement.style.backgroundColor = hexColor;
+            this.previewHexElement.innerText = hexColor;
+            if(this.options.gradient){
+                this.updateSliderGradients();
+            }
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.previewElement, style && style.preview);
+            styleElement(this.previewHexElement, style && style.previewHex);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            // Preview
+            this.previewHexElement = createElement({
+                tag: "div",
+                class: "uxColorPickerPreviewHex",
+            });
+            this.previewElement = createElement({
+                tag: "div",
+                class: "uxColorPickerPreview",
+                children: [this.previewHexElement],
+            });
+            // Red
+            this.redCursorElement = createElement({
+                tag: "div",
+                classList: ["uxColorPickerCursor", "uxColorPickerCursorRed"],
+            });
+            this.redSliderElement = createElement({
+                tag: "div",
+                classList: ["uxColorPickerSlider", "uxColorPickerSliderRed"],
+                children: [this.redCursorElement],
+            });
+            this.redSlider = new Slider({
+                horizontal: true,
+                container: this.redSliderElement,
+                cursor: this.redCursorElement,
+                minValue: () => 0,
+                maxValue: () => 255,
+                onchange: (value, position) => {
+                    this.updatePreviewColor();
+                    this.redCursorElement.style.marginLeft = position;
+                },
+            });
+            // Green
+            this.greenCursorElement = createElement({
+                tag: "div",
+                classList: ["uxColorPickerCursor", "uxColorPickerCursorGreen"],
+            });
+            this.greenSliderElement = createElement({
+                tag: "div",
+                classList: ["uxColorPickerSlider", "uxColorPickerSliderGreen"],
+                children: [this.greenCursorElement],
+            });
+            this.greenSlider = new Slider({
+                horizontal: true,
+                container: this.greenSliderElement,
+                cursor: this.greenCursorElement,
+                minValue: () => 0,
+                maxValue: () => 255,
+                onchange: (value, position) => {
+                    this.updatePreviewColor();
+                    this.greenCursorElement.style.marginLeft = position;
+                },
+            });
+            // Blue
+            this.blueCursorElement = createElement({
+                tag: "div",
+                classList: ["uxColorPickerCursor", "uxColorPickerCursorBlue"],
+            });
+            this.blueSliderElement = createElement({
+                tag: "div",
+                classList: ["uxColorPickerSlider", "uxColorPickerSliderBlue"],
+                children: [this.blueCursorElement],
+            });
+            this.blueSlider = new Slider({
+                horizontal: true,
+                container: this.blueSliderElement,
+                cursor: this.blueCursorElement,
+                minValue: () => 0,
+                maxValue: () => 255,
+                onchange: (value, position) => {
+                    this.updatePreviewColor();
+                    this.blueCursorElement.style.marginLeft = position;
+                },
+            });
+            // Root
+            this.rootElement = createElement({
+                tag: "div",
+                value: options.value,
+                class: "uxColorPicker",
+                children: [
+                    this.previewElement,
+                    this.redSliderElement,
+                    this.greenSliderElement,
+                    this.blueSliderElement,
+                ],
+            });
+            // Set initial state
+            if(options.red){
+                this.red = options.red;
+            }
+            if(options.green){
+                this.green = options.green;
+            }
+            if(options.blue){
+                this.blue = options.blue;
+            }
+            if(options.value){
+                this.value = options.value;
+            }
+            // Apply styles, then all done!
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

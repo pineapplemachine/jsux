@@ -1,0 +1,47 @@
+<link rel="import" href="event-listener.html">
+
+<script>
+    
+    class UxKeyboardClass extends UxEventSpawner{
+        constructor(){
+            super();
+            document.addEventListener("keydown", this.getEventHandler("keydown"));
+            document.addEventListener("keypress", this.getEventHandler("keypress"));
+            document.addEventListener("keyup", this.getEventHandler("keyup"));
+        }
+        addEventListenerOver(overElement, eventName, callback){
+            const listener = new UxEventListener(overElement, eventName,
+                event => callback.call(overElement, event)
+            );
+            listener.active = false;
+            overElement.addEventListener("mouseover", event => {
+                listener.active = true;
+            });
+            overElement.addEventListener("mouseout", event => {
+                listener.active = false;
+            });
+            return this.addEventListener(listener);
+        }
+        removeEventListenerOver(overElement, eventName, callback){
+            if(overElement instanceof UxEventListener){
+                const listener = overElement;
+                return this.removeEventListener(listener);
+            }else{
+                const listenersList = this.eventListeners[eventName];
+                const index = listenersList && listenerList.findIndex(
+                    listener => (
+                        overElement === listener.owner &&
+                        callback === listener.callback
+                    )
+                );
+                if(index >= 0){
+                    listenerList.splice(index, 1);
+                }
+            }
+        }
+    }
+    
+    const UxKeyboard = new UxKeyboardClass();
+    UxKeyboardClass.Singleton = UxKeyboard;
+    
+</script>

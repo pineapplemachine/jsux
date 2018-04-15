@@ -1,0 +1,77 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<script>
+
+    class UxTextArea extends UxElement{
+        static css(theme){
+            return `
+            .uxTextArea {
+                position: relative;
+                display: block;
+                height: 100px;
+                margin: ${theme.elementMargin};
+            }
+            .uxTextAreaInput {
+                width: 100%;
+                height: 100%;
+                resize: none;
+                padding: 2px 4px;
+                overflow: hidden;
+                background-color: transparent;
+                font-family: ${theme.fontFamily};
+                color: ${theme.foreground};
+                font-size: ${theme.smallFontSize};
+                box-sizing: border-box;
+                border-style: solid;
+                border-width: 2px;
+                border-color: ${theme.middleground};
+                border-radius: 2px;
+            }
+            .uxTextArea::placeholder {
+                color: ${theme.foregroundDark};
+            }
+            .uxTextArea::selection {
+                background: ${theme.accent};
+            }
+            `;
+        }
+        get value(){
+            return this.inputElement.value;
+        }
+        set value(value){
+            this.inputElement.value = value;
+        }
+        get placeholder(){
+            return this.inputElement.placeholder;
+        }
+        set placeholder(placeholder){
+            this.inputElement.placeholder = placeholder;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.inputElement, style && style.input);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.inputElement = createElement({
+                tag: "textarea",
+                class: "uxTextAreaInput",
+                value: options.value,
+                placeholder: options.placeholder,
+                rows: 1,
+                cols: 1,
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxTextArea",
+                children: [this.inputElement],
+            });
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

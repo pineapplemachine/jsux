@@ -1,0 +1,17 @@
+<script>
+    
+    const UxMouse = {
+        mouseX: undefined,
+        mouseY: undefined,
+        mouseClientX: undefined,
+        mouseClientY: undefined,
+    };
+    
+    window.addEventListener("mousemove", function(event){
+        UxMouse.mouseX = event.pageX;
+        UxMouse.mouseY = event.pageY;
+        UxMouse.mouseClientX = event.clientX;
+        UxMouse.mouseClientY = event.clientY;
+    });
+    
+</script>

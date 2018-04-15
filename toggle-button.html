@@ -1,0 +1,72 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<script>
+
+    class UxToggleButton extends UxElement{
+        static css(theme){
+            return `
+            .uxToggleButton {
+                display: block;
+                text-align: center;
+                height: ${theme.lineHeight}px;
+                line-height: ${theme.lineHeight}px;
+                margin: ${theme.elementMargin};
+                border-radius: 2px;
+                background-color: ${theme.middleground};
+                box-sizing: border-box;
+                cursor: pointer;
+                border-style: solid;
+                border-width: 1px;
+                border-color: transparent;
+            }
+            .uxToggleButton:hover {
+                border-color: ${theme.middlegroundLight};
+            }
+            .uxToggleButton:active {
+                background-color: ${theme.middlegroundDark};
+            }
+            .uxToggleButtonActive {
+                background-color: ${theme.middlegroundDark};
+            }
+            .uxToggleButtonActive:active {
+                background-color: ${theme.middleground};
+            }
+            `;
+        }
+        get value(){
+            return this.currentValue;
+        }
+        set value(value){
+            if(value !== this.currentValue){
+                this.currentValue = value;
+                updateClass("uxToggleButtonActive", value, this.rootElement);
+                if(this.onchange){
+                    this.onchange(value);
+                }
+            }
+        }
+        get text(){
+            return this.rootElement.innerText;
+        }
+        set text(text){
+            this.rootElement.innerText = text;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.onchange = options.onchange;
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxToggleButton",
+                content: options.text || "[Untitled button]",
+                onleftclick: event => {
+                    this.value = !this.value;
+                },
+            })
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

@@ -1,0 +1,339 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+<link rel="import" href="keyboard.html">
+
+<script>
+    
+    class UxListItem extends UxElement{
+        static css(theme){
+            return `
+            .uxListItem {
+                display: block;
+                width: 100%;
+                height: ${theme.lineHeight}px;
+                line-height: ${theme.lineHeight}px;
+                padding: 0 4px;
+                border-width: 0;
+                border-width: 1px;
+                border-style: solid;
+                border-color: transparent;
+                border-radius: 2px;
+                box-sizing: border-box;
+            }
+            .uxListItemActive {
+                border-color: ${theme.middlegroundLight};
+            }
+            .uxListItemSelected {
+                background-color: ${theme.middleground};
+                border-radius: 0;
+            }
+            .uxListItemFiltered {
+                display: none;
+            }
+            `;
+        }
+        get title(){
+            return this.rootElement.innerText;
+        }
+        set title(title){
+            this.rootElement.innerText = title;
+        }
+        get active(){
+            return this.rootElement.classList.contains("uxListItemActive");
+        }
+        set active(active){
+            updateClass("uxListItemActive", active, this.rootElement);
+        }
+        get selected(){
+            return this.rootElement.classList.contains("uxThumbsItemSelected");
+        }
+        set selected(selected){
+            updateClass("uxListItemSelected", selected, this.rootElement);
+        }
+        get filtered(){
+            return this.rootElement.classList.contains("uxListItemFiltered");
+        }
+        set filtered(filtered){
+            updateClass("uxListItemFiltered", filtered, this.rootElement);
+        }
+        select(){
+            this.parent.select(this);
+            return this;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxListItem",
+                onclick: this.getEventHandler("click"),
+                onmouseover: this.getEventHandler("mouseover"),
+                onmouseout: this.getEventHandler("mouseout"),
+            });
+            // Set state
+            this.title = options.title;
+            this.sortOrder = options.sortOrder;
+            this.key = options.key || options.title;
+            this.value = options.value;
+            // Apply styles
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+    class UxList extends UxContainerElement{
+        static css(theme){
+            return `
+            .uxList {
+                display: block;
+                position: relative;
+                margin: ${theme.elementMargin};
+                box-sizing: border-box;
+                border-radius: 2px;
+                border-style: solid;
+                border-width: 1px;
+                border-color: ${theme.middleground};
+            }
+            `;
+        }
+        get childContainerElement(){
+            return this.rootElement;
+        }
+        get value(){
+            return this.selectedItem && this.selectedItem.value;
+        }
+        set value(value){
+            if(value !== this.value){
+                for(let itemElement of this.children){
+                    if(itemElement.value === value){
+                        return this.select(itemElement);
+                    }
+                }
+                return this.select(undefined);
+            }
+        }
+        filter(filterFunction){
+            for(let element of this.children){
+                element.filtered = !filterFunction(element);
+            }
+        }
+        sort(orderFunction){
+            let needsSort = false;
+            let firstChildElement = true;
+            let firstSortOrder;
+            let indexInParent = 0;
+            for(let element of this.children){
+                element.indexInParent = indexInParent++;
+                if(orderFunction){
+                    element.sortOrder = orderFunction(element);
+                }
+                if(firstChildElement){
+                    firstChildElement = false;
+                    firstSortOrder = element.sortOrder;
+                }else if(element.sortOrder !== firstSortOrder){
+                    needsSort = true;
+                }
+            }
+            if(true){
+                Array.prototype.sort.call(this.children, (a, b) => {
+                    if(a.order < b.order) return -1;
+                    if(a.order > b.order) return +1;
+                    if(a.indexInParent < b.indexInParent) return -1;
+                    if(a.indexInParent > b.indexInParent) return +1;
+                    return 0;
+                }).forEach(element => {
+                    this.childContainerElement.appendChild(element.element);
+                });
+            }
+        }
+        search(searchString){
+            this.sort(itemElement => {
+                const key = itemElement.key && itemElement.key.toUpperCase();
+                if(!key || !key.length) return undefined;
+                const search = (searchString || "").trim().toUpperCase();
+                if(key === search) return 0;
+                const index = key.indexOf(search);
+                if(index === 0) return 1;
+                else if(index > 0) return 2;
+                else return undefined;
+            });
+            this.filter(itemElement => {
+                return itemElement.sortOrder !== undefined;
+            });
+        }
+        get activeItem(){
+            return this.activeElement;
+            for(let element of this.children){
+                if(element.active) return element;
+            }
+            return undefined;
+        }
+        set activeItem(itemElement){
+            if(itemElement !== this.activeElement){
+                if(this.activeElement){
+                    this.activeElement.active = false;
+                }
+                if(itemElement){
+                    itemElement.active = true;
+                }
+                this.activeElement = itemElement;
+            }
+        }
+        moveActiveCursorUp(steps = 1){
+            if(steps && this.activeElement){
+                let current = this.activeElement;
+                while(true){
+                    const next = current.prevSibling;
+                    if(!next){
+                        if(current !== this.activeElement){
+                            this.activeItem = current;
+                            this.handleEvent("activecursorup", current);
+                        }
+                        return;
+                    }
+                    if(next.visible && --steps <= 0){
+                        this.activeItem = next;
+                        return this.handleEvent("activecursorup", next);
+                    }
+                    current = next;
+                }
+            }
+        }
+        moveActiveCursorDown(steps = 1){
+            if(steps && this.activeElement){
+                let current = this.activeElement;
+                while(true){
+                    const next = current.nextSibling;
+                    if(!next){
+                        if(current !== this.activeElement){
+                            this.activeItem = current;
+                            this.handleEvent("activecursordown", current);
+                        }
+                        return;
+                    }
+                    if(next.visible && --steps <= 0){
+                        this.activeItem = next;
+                        return this.handleEvent("activecursordown", next);
+                    }
+                    current = next;
+                }
+            }else if(!this.activeElement){
+                for(let element of this.children){
+                    if(element.visible){
+                        this.activeItem = element;
+                        return this.handleEvent("activecursordown", element);
+                    }
+                }
+            }
+        }
+        moveActiveCursorToTop(){
+            for(let element of this.children){
+                if(element.visible){
+                    this.activeItem = element;
+                    return this.handleEvent("activecursorup", element);
+                }
+            }
+        }
+        moveActiveCursorToBottom(){
+            for(let i = this.children.length; i--; i >= 0){
+                const element = this.children[i];
+                if(element.visible){
+                    this.activeItem = element;
+                    return this.handleEvent("activecursordown", element);
+                }
+            }
+        }
+        handleActiveCursorKeyEvent(event){
+            if(event.key === "ArrowUp"){
+                if(event.ctrlKey){
+                    this.moveActiveCursorToTop();
+                }else{
+                    this.moveActiveCursorUp(event.shiftKey ? 5 : 1);
+                }
+            }else if(event.key === "ArrowDown"){
+                if(event.ctrlKey){
+                    this.moveActiveCursorToBottom();
+                }else{
+                    this.moveActiveCursorDown(event.shiftKey ? 5 : 1);
+                }
+            }else if(event.key === "Enter"){
+                this.selectActiveItem();
+            }
+        }
+        select(itemElement){
+            if(itemElement !== this.selectedItem){
+                if(this.selectedItem){
+                    this.selectedItem.selected = false;
+                }
+                if(itemElement){
+                    itemElement.selected = true;
+                }
+                this.selectedItem = itemElement;
+                this.handleEvent("change", this);
+            }
+        }
+        selectActiveItem(){
+            this.select(this.activeItem);
+        }
+        handleKeyDownEvent(event){
+            const listen = this.handleEvent("keydown", event);
+            if(listen === false){
+                return listen;
+            }else{
+                this.handleActiveCursorKeyEvent(event);
+            }
+            return false;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxList",
+            });
+            UxKeyboard.addEventListenerOver(this.rootElement, "keydown",
+                event => this.handleKeyDownEvent(event)
+            );
+            // Add initial list items
+            this.addItems(options.items);
+            // Set value and state
+            this.value = options.value;
+            // Set style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+        addItem(options){
+            return this.addOne(new UxListItem(options));
+        }
+        addOne(child){
+            child.addEventListener("leftclick", event => {
+                this.select(
+                    this.selectedItem === child ? undefined : child
+                );
+                this.activeItem = undefined;
+            });
+            child.addEventListener("mouseover", event => {
+                // Only trigger when the mouse actually moved -
+                // not when e.g. a container was scrolled
+                if(event.movementX || event.movementY){
+                    this.activeItem = child;
+                }
+            });
+            child.addEventListener("mouseout", event => {
+                if(event.movementX || event.movementY){
+                    this.activeItem = undefined;
+                }
+            });
+            return super.addOne(child);
+        }
+    }
+    
+</script>

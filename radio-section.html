@@ -1,0 +1,64 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<link rel="import" href="radio-group.html">
+<link rel="import" href="section.html">
+
+<script>
+
+    class UxRadioSection extends UxElement{
+        get element(){
+            return this.sectionElement.element;
+        }
+        get value(){
+            return this.radioGroupElement.value;
+        }
+        set value(value){
+            this.radioGroupElement.value = value;
+        }
+        get group(){
+            return this.radioGroupElement.group;
+        }
+        set group(group){
+            this.radioGroupElement.group = group;
+        }
+        get title(){
+            return this.sectionElement.title;
+        }
+        set title(title){
+            this.sectionElement.title = title;
+        }
+        select(radio){
+            this.radioGroupElement.select(radio);
+            return this;
+        }
+        setStyle(style){
+            styleElement(this.sectionElement.element, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.sectionElement = new UxSection({
+                title: options.title,
+                tooltip: options.tooltip,
+            });
+            this.radioGroupElement = new UxRadioGroup({
+                value: options.value,
+                group: options.group,
+                items: options.items,
+            });
+            this.sectionElement.add(this.radioGroupElement);
+            // Set style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+        addItem(options){
+            return this.radioGroupElement.addItem(options);
+        }
+        addItems(optionsList){
+            return this.radioGroupElement.addItems(optionsList);
+        }
+    }
+    
+</script>

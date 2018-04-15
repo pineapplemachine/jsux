@@ -1,0 +1,144 @@
+<link rel="import" href="color.html">
+<link rel="import" href="element.html">
+<link rel="import" href="tooltip.html">
+
+<script>
+    
+    class UxTheme{
+        get background(){
+            return this.backgroundColor;
+        }
+        set background(color){
+            this.backgroundColor = new UxColor(color);
+        }
+        get foregroundLight(){
+            return this.foregroundLightColor;
+        }
+        set foregroundLight(color){
+            this.foregroundLightColor = new UxColor(color);
+        }
+        get foreground(){
+            return this.foregroundColor;
+        }
+        set foreground(color){
+            this.foregroundColor = new UxColor(color);
+        }
+        get foregroundDark(){
+            return this.foregroundDarkColor;
+        }
+        set foregroundDark(color){
+            this.foregroundDarkColor = new UxColor(color);
+        }
+        get middlegroundLight(){
+            return this.middlegroundLightColor;
+        }
+        set middlegroundLight(color){
+            this.middlegroundLightColor = new UxColor(color);
+        }
+        get middleground(){
+            return this.middlegroundColor;
+        }
+        set middleground(color){
+            this.middlegroundColor = new UxColor(color);
+        }
+        get middlegroundDark(){
+            return this.middlegroundDarkColor;
+        }
+        set middlegroundDark(color){
+            this.middlegroundDarkColor = new UxColor(color);
+        }
+        get accent(){
+            return this.accentColor;
+        }
+        set accent(color){
+            this.accentColor = new UxColor(color);
+        }
+        get extraCss(){
+            return this.styleElement && this.styleElement.innerText;
+        }
+        set extraCss(css){
+            if(css && !this.styleElement){
+                this.styleElement = createElement({
+                    tag: "style",
+                    content: typeof(css) === "string" ? css : css(this),
+                });
+                document.children[0].appendChild(this.styleElement);
+            }else if(this.styleElement){
+                this.styleElement.innerText = css;
+            }
+        }
+        get elementMargin(){
+            return (
+                `${this.elementHorizontalMargin}px ` +
+                `${this.elementVerticalMargin}px`
+            );
+        }
+        handleElementType(elementType){
+            if(elementType.css){
+                const css = elementType.css(this).replace(/\s+/g, " ");
+                if(this.styleElements[elementType.name]){
+                    this.styleElements[elementType.name].innerText = css;
+                }else{
+                    const styleElement = createElement({
+                        tag: "style",
+                        content: css,
+                    });
+                    this.styleElements[elementType.name] = styleElement;
+                    document.children[0].appendChild(styleElement);
+                }
+                // Theme-specific CSS should always be last so that it takes
+                // precedence over element-specific CSS
+                if(this.styleElement){
+                    document.children[0].appendChild(this.styleElement);
+                }
+            }
+        }
+        apply(){
+            this.handleElementType(UxTooltip);
+            for(let elementTypeName in UxElement.allElementTypes){
+                const elementType = UxElement.allElementTypes[elementTypeName];
+                this.handleElementType(elementType);
+            }
+        }
+        constructor(options = {}){
+            // The background color
+            this.background = options.background;
+            // Text and other foreground colors
+            this.foreground = options.foreground;
+            this.foregroundLight = (options.foregroundLight ||
+                this.foreground.screen(0.35)
+            );
+            this.foregroundDark = (options.foregroundDark ||
+                this.foreground.multiply(0.6)
+            );
+            // Element and other middle-ground colors
+            // These generally go on top of a background and under a foreground
+            this.middleground = options.middleground;
+            this.middlegroundLight = (options.middlegroundLight ||
+                this.middleground.screen(0.35)
+            );
+            this.middlegroundDark = (options.middlegroundDark ||
+                this.middleground.multiply(0.6)
+            );
+            // The accent color
+            this.accent = options.accent;
+            // Font options
+            this.fontFamily = options.fontFamily || "sans-serif";
+            this.fontSize = options.fontSize || 16;
+            this.smallFontSize = options.fontSize * 0.875 || 14;
+            // Sizing options
+            this.lineHeight = options.lineHeight || 26;
+            this.scrollBarWidth = options.scrollBarWidth || 8;
+            this.elementHorizontalMargin = options.elementHorizontalMargin || 12;
+            this.elementVerticalMargin = options.elementVerticalMargin || 8;
+            // Extra CSS
+            this.extraCss = options.extraCss;
+            // Other stuff
+            this.styleElements = {};
+            UxElement.addNewElementTypeListener(elementType => {
+                this.handleElementType(elementType);
+            });
+        }
+    }
+    
+</script>

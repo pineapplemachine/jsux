@@ -1,0 +1,130 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+<link rel="import" href="tooltip.html">
+
+<script>
+    
+    class UxToolbarItem extends UxElement{
+        static css(theme){
+            return `
+            .uxToolbarItem {
+                display: inline-block;
+                width: 32px;
+                height: 32px;
+                padding: 8px;
+                cursor: pointer;
+            }
+            .uxToolbarItem:hover {
+                background-color: ${theme.middleground};
+            }
+            .uxToolbarItem:active {
+                background-color: ${theme.middlegroundDark};
+            }
+            `;
+        }
+        get src(){
+            return this.rootElement.src;
+        }
+        set src(src){
+            this.rootElement.src = src;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.title = options.title;
+            this.onleftclick = options.onleftclick;
+            this.onmouseover = options.onmouseover;
+            this.onmouseout = options.onmouseout;
+            this.rootElement = createElement({
+                tag: "img",
+                src: options.src,
+                alt: options.title || options.tooltip,
+                class: "uxToolbarItem",
+                onleftclick: event => {
+                    if(this.onleftclick){
+                        return this.onleftclick(event);
+                    }
+                },
+                onmouseover: event => {
+                    if(this.onmouseover){
+                        return this.onmouseover(event);
+                    }
+                },
+                onmouseout: event => {
+                    if(this.onmouseout){
+                        return this.onmouseout(event);
+                    }
+                },
+            });
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+
+    class UxToolbar extends UxContainerElement{
+        static css(theme){
+            return `
+            .uxToolbar {
+                display: block;
+                position: relative;
+                width: 100%;
+                height: auto;
+                line-height: 48px;
+                border-bottom-style: solid;
+                border-bottom-width: 3px;
+                border-color: ${theme.middleground};
+                margin-bottom: 14px;
+            }
+            .uxToolbarItemTitle {
+                display: block;
+                position: absolute;
+                font-size: 16px;
+                height: 14px;
+                line-height: 14px;
+                bottom: -24px;
+                right: 0;
+                text-align: right;
+                line-height: 16px;
+                padding: 0 6px;
+            }
+            `;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.itemTitleElement = createElement({
+                tag: "div",
+                class: "uxToolbarItemTitle",
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxToolbar",
+                children: [this.itemTitleElement],
+            });
+            // Add items
+            this.addItems(options.items);
+            // Set style, then all done!
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+        addItem(options){
+            const itemElement = new UxToolbarItem(options);
+            itemElement.onmouseover = event => {
+                this.itemTitleElement.innerText = itemElement.title || "";
+            };
+            itemElement.onmouseout = event => {
+                this.itemTitleElement.innerText = "";
+            };
+            return this.addOne(itemElement);
+        }
+    }
+    
+</script>

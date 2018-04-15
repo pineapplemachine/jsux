@@ -1,0 +1,132 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+<link rel="import" href="tooltip.html">
+
+<script>
+
+    class UxCheckbox extends UxElement{
+        static css(theme){
+            const checkHeight = theme.fontSize + 4;
+            return `
+            .uxCheckbox {
+                display: block;
+                position: relative;
+                height: ${checkHeight}px;
+                line-height: ${checkHeight}px;
+                margin: ${theme.elementMargin};
+                cursor: pointer;
+            }
+            .uxCheckbox:hover > .uxCheckboxIcon {
+                border-color: ${theme.foreground};
+            }
+            .uxCheckbox:active > .uxCheckboxIcon {
+                border-color: ${theme.foreground};
+            }
+            .uxCheckbox input:checked ~ .uxCheckboxIcon {
+                background-color: ${theme.accent};
+            }
+            .uxCheckboxIcon:after {
+                content: "✖";
+                display: none;
+                color: ${theme.foregroundLight};
+                font-size: ${checkHeight - 2}px;
+                margin-left: -1px;
+                margin-top: -1px;
+                width: ${checkHeight}px;
+                height: ${checkHeight}px;
+                line-height: ${checkHeight}px;
+                text-align: center;
+            }
+            .uxCheckbox input:checked ~ .uxCheckboxIcon:after {
+                display: block;
+            }
+            .uxCheckboxInput {
+                display: inline;
+                vertical-align: middle;
+                width: 0;
+                margin: 0;
+                opacity: 0;
+            }
+            .uxCheckboxIcon {
+                display: inline-block;
+                vertical-align: middle;
+                width: ${checkHeight}px;
+                height: ${checkHeight}px;
+                background-color: ${theme.middleground};
+                box-sizing: border-box;
+                border-radius: 2px;
+                border-style: solid;
+                border-width: 1px;
+                border-color: transparent;
+            }
+            .uxCheckboxTitle {
+                display: inline;
+                vertical-align: middle;
+                margin-left: ${checkHeight / 2}px;
+            }
+            `;
+        }
+        get tooltipTargetElement(){
+            return this.titleElement;
+        }
+        get value(){
+            return this.inputElement.checked;
+        }
+        set value(checked){
+            if(checked !== this.inputElement.checked){
+                this.inputElement.checked = checked;
+                if(this.onchange){
+                    this.onchange(checked);
+                }
+            }
+        }
+        get title(){
+            return this.titleElement.innerText;
+        }
+        set title(title){
+            this.titleElement.innerText = title;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.iconElement, style && style.icon);
+            styleElement(this.titleElement, style && style.title);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.onchange = options.onchange;
+            this.inputElement = createElement({
+                tag: "input",
+                type: "checkbox",
+                checked: options.checked || false,
+                class: "uxCheckboxInput",
+            });
+            this.iconElement = createElement({
+                tag: "div",
+                class: "uxCheckboxIcon",
+            });
+            this.titleElement = createElement({
+                tag: "div",
+                content: options.title || "[Untitled checkbox]",
+                class: "uxCheckboxTitle",
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxCheckbox",
+                children: [
+                    this.inputElement, this.iconElement, this.titleElement,
+                ],
+                onleftclick: event => {
+                    if(event.path[0] !== this.inputElement){
+                        this.value = !this.value;
+                    }
+                },
+            });
+            // Set style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

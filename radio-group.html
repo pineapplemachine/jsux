@@ -1,0 +1,84 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<link rel="import" href="radio.html">
+
+<script>
+
+    class UxRadioGroup extends UxContainerElement{
+        get childContainerElement(){
+            return this.rootElement;
+        }
+        get value(){
+            return this.selectedItem && this.selectedItem.value;
+        }
+        set value(value){
+            for(let radio of this.children){
+                if(radio.value === value){
+                    return this.select(radio);
+                }
+            }
+        }
+        get group(){
+            return this.radioGroup;
+        }
+        set group(group){
+            this.radioGroup = group;
+            for(let radio of this.radioElements){
+                radio.group = group;
+            }
+        }
+        select(itemElement){
+            if(itemElement !== this.selectedItem){
+                if(this.selectedItem){
+                    this.selectedItem.value = false;
+                }
+                if(itemElement){
+                    itemElement.value = true;
+                }
+                this.selectedItem = itemElement;
+                if(this.onchange){
+                    this.onchange(itemElement.value);
+                }
+            }
+            return this;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.onchange = options.onchange;
+            this.radioGroup = options.group || (
+                `UxRadioGroup #${UxRadioGroup.autoGroupCounter++}`
+            );
+            this.radioElements = [];
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxRadioGroup",
+            });
+            this.addItems(options.items);
+            this.value = options.value;
+            // Set style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+        addItem(options){
+            const radio = new UxRadio(options);
+            radio.group = this.group;
+            radio.onchange = value => {
+                if(value){
+                    this.selectedItem = radio;
+                }else{
+                    this.selectedItem = undefined;
+                }
+            };
+            return this.addOne(radio);
+        }
+    }
+    
+    UxRadioGroup.autoGroupCounter = 1;
+    
+</script>

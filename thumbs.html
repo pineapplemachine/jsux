@@ -1,0 +1,150 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+<link rel="import" href="tooltip.html">
+
+<script>
+
+    class UxThumbsItem extends UxElement{
+        static css(theme){
+            return `
+            .uxThumbs {
+                display: block;
+                width: 100%;
+                margin: ${theme.elementMargin};
+            }
+            .uxThumbsItem {
+                display: inline-block;
+                padding: 2px;
+                border-radius: 4px;
+                box-sizing: border-box;
+                cursor: pointer;
+                border-style: solid;
+                border-width: 1px;
+                border-color: transparent;
+            }
+            .uxThumbsItem:hover {
+                border-color: ${theme.middlegroundLight};
+            }
+            .uxThumbsItem:active {
+                background-color: ${theme.middleground};
+            }
+            .uxThumbsItemSelected {
+                background-color: ${theme.middleground};
+            }
+            `;
+        }
+        get src(){
+            return this.rootElement.src;
+        }
+        set src(src){
+            this.rootElement.src = src;
+        }
+        get selected(){
+            return this.rootElement.classList.contains("uxThumbsItemSelected");
+        }
+        set selected(selected){
+            updateClass("uxThumbsItemSelected", selected, this.rootElement);
+        }
+        select(){
+            this.parent.select(this);
+            return this;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.value = options.value;
+            this.onleftclick = options.onleftclick;
+            this.rootElement = createElement({
+                tag: "img",
+                src: options.src,
+                alt: options.tooltip,
+                class: "uxThumbsItem",
+                onleftclick: event => {
+                    if(this.onleftclick){
+                        return this.onleftclick(event);
+                    }
+                },
+            });
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+
+    class UxThumbs extends UxContainerElement{
+        static css(theme){
+            return `
+            .uxThumbs {
+                display: block;
+                width: 100%;
+            }
+            `;
+        }
+        get childContainerElement(){
+            return this.rootElement;
+        }
+        get value(){
+            return this.selectedItem && this.selectedItem.value;
+        }
+        set value(value){
+            if(value !== this.value){
+                for(let itemElement of this.children){
+                    if(itemElement.value === value){
+                        return this.select(itemElement);
+                    }
+                }
+                return this.select(undefined);
+            }
+        }
+        select(itemElement){
+            if(itemElement !== this.selectedItem){
+                if(this.selectedItem){
+                    this.selectedItem.selected = false;
+                }
+                if(itemElement){
+                    itemElement.selected = true;
+                }
+                this.selectedItem = itemElement;
+                if(this.onchange){
+                    this.onchange(this.value);
+                }
+            }
+            return this;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            if(style && style.item){
+                for(let item of this.rootElement.children){
+                    styleElement(item, style.item);
+                }
+            }
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.onchange = options.onchange;
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxThumbs",
+                style: options.style,
+            });
+            // Add items
+            this.addItems(options.items);
+            // Set style, then all done
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+        addItem(options){
+            const itemElement = new UxThumbsItem(options);
+            itemElement.onleftclick = event => {
+                this.select(itemElement);
+            };
+            return this.addOne(itemElement);
+        }
+    }
+    
+</script>

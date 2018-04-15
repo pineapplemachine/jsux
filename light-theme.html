@@ -1,0 +1,39 @@
+<link rel="import" href="theme.html">
+
+<script>
+    
+    const UxLightTheme = new UxTheme({
+        background: "#ddd",
+        foregroundLight: "#000",
+        foreground: "#050505",
+        foregroundDark: "#333",
+        middlegroundLight: "#666",
+        middleground: "#9c9c9c",
+        middlegroundDark: "#bbb",
+        accent: "#79f",
+        fontFamily: "Arial, sans-serif",
+        extraCss: theme => `
+            .uxElement {
+                font-size: ${theme.fontSize}px;
+                font-family: ${theme.fontFamily};
+                color: ${theme.foreground};
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+            .uxElementHidden {
+                display: none !important;
+            }
+            .uxTooltip {
+                background-color: #eee;
+                box-shadow: 2px 2px rgba(30, 30, 30, 0.5);
+            }
+        `,
+    });
+    
+    UxLightTheme.apply();
+    
+</script>

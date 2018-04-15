@@ -1,0 +1,81 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<link rel="import" href="section.html">
+<link rel="import" href="scroll-area.html">
+
+<script>
+    
+    class UxScrollSection extends UxContainerElement{
+        static css(theme){
+            return `
+            .uxScrollSection > .uxSectionContent {
+                padding: 0;
+            }
+            .uxScrollSection > .uxSectionContent > .uxScrollArea {
+                width: 100%;
+                height: 100%;
+            }
+            `;
+        }
+        get element(){
+            return this.sectionElement.element;
+        }
+        get childContainerElement(){
+            return this.scrollAreaElement.childContainerElement;
+        }
+        get children(){
+            return this.scrollAreaElement.children;
+        }
+        // UxSection
+        get title(){
+            return this.sectionElement.title;
+        }
+        set title(title){
+            this.sectionElement.title = title;
+        }
+        get collapsible(){
+            return this.sectionElement.collapsible;
+        }
+        set collapsible(collapsible){
+            this.sectionElement.collapsible = collapsible;
+        }
+        get collapsed(){
+            return this.sectionElement.collapsed;
+        }
+        set collapsed(collapsed){
+            this.sectionElement.collapsed = collapsed;
+        }
+        // UxScrollArea
+        get scroll(){
+            return this.scrollAreaElement.scroll;
+        }
+        set scroll(value){
+            this.scrollAreaElement.scroll = scroll;
+        }
+        get scrollHeight(){
+            return this.scrollAreaElement.scrollHeight;
+        }
+        scrollTo(element){
+            return this.scrollAreaElement.scrollTo(element);
+        }
+        // UxScrollSection
+        setStyle(style){
+            // TODO: more sensible styling
+            styleElement(this.sectionElement.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.sectionElement = new UxSection(options);
+            this.scrollAreaElement = new UxScrollArea();
+            this.sectionElement.element.classList.add("uxScrollSection");
+            this.sectionElement.add(this.scrollAreaElement);
+            // Set style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

@@ -1,0 +1,152 @@
+<link rel="import" href="helpers.html">
+
+<script>
+    
+    class Slider{
+        get value(){
+            return this.currentValue;
+        }
+        set value(value){
+            this.currentValue = Math.max(this.minValue, Math.min(
+                this.maxValue, value
+            ));
+            this.updatePosition();
+        }
+        get minValue(){
+            return this.getMinValue ? this.getMinValue() : 0;
+        }
+        get maxValue(){
+            return this.getMaxValue ? this.getMaxValue() : 1;
+        }
+        updatePosition(){
+            if(this.containerElement.clientWidth){
+                return this.onchange(
+                    this.currentValue,
+                    this.getSliderPosition({
+                        container: this.containerElement,
+                        cursor: this.cursorElement,
+                        minValue: this.minValue,
+                        maxValue: this.maxValue,
+                        value: this.value,
+                    })
+                );
+            }else{
+                // Update position as soon as the DOM elements are rendered
+                requestAnimationFrame(() => this.updatePosition())
+            }
+        }
+        handleDragEvent(event){
+            this.value = this.getSliderValue({
+                container: this.containerElement,
+                cursor: this.cursorElement,
+                minValue: this.minValue,
+                maxValue: this.maxValue,
+                offset: this.dragOffset,
+                event: event,
+            })
+        }
+        constructor(options){
+            // Set state and properties
+            this.position = undefined;
+            this.dragging = false;
+            this.dragOffset = 0;
+            this.getMinValue = options.minValue;
+            this.getMaxValue = options.maxValue;
+            this.containerElement = options.container;
+            this.cursorElement = options.cursor;
+            this.autoCursorSize = options.autoCursorSize;
+            this.onchange = options.onchange;
+            if(options.horizontal){
+                this.horizontal = true;
+                this.vertical = false;
+                this.getSliderValue = getHorizontalSliderValue;
+                this.getSliderPosition = getHorizontalSliderPosition;
+            }else if(options.vertical){
+                this.horizontal = false;
+                this.vertical = true;
+                this.getSliderValue = getVerticalSliderValue;
+                this.getSliderPosition = getVerticalSliderPosition;
+            }else{
+                throw new Error("Slider must be either horizontal or vertical.");
+            }
+            // Add event listeners
+            this.cursorElement.addEventListener("mousedown", event => {
+                if(event.button === 0 && !event.ctrlKey){
+                    event.handledBySliderCursor = true;
+                    const cursorRect = this.cursorElement.getBoundingClientRect();
+                    this.dragging = true;
+                    this.dragOffset = (this.horizontal ?
+                        event.clientX - cursorRect.left :
+                        event.clientY - cursorRect.top
+                    );
+                }
+            });
+            this.containerElement.addEventListener("mousedown", event => {
+                if(event.button === 0 && !event.ctrlKey &&
+                    !event.handledBySliderCursor
+                ){
+                    this.dragging = true;
+                    this.dragOffset = undefined;
+                    this.handleDragEvent(event);
+                }
+            });
+            window.addEventListener("mouseup", event => {
+                this.dragging = false
+            });
+            window.addEventListener("mousemove", event => {
+                if(this.dragging){
+                    this.handleDragEvent(event);
+                }
+            });
+            // Set value
+            this.value = options.value || (
+                0.5 * (this.maxValue - this.minValue)
+            );
+        }
+    }
+    
+    function getHorizontalSliderPosition(options){
+        const width = options.container.clientWidth - options.cursor.offsetWidth;
+        const range = options.maxValue - options.minValue;
+        const value = options.value - options.minValue;
+        return width * value / range;
+    }
+    function getHorizontalSliderValue(options){
+        const rect = options.container.getBoundingClientRect();
+        const offset = options.offset || (options.cursor.offsetWidth * 0.5);
+        const width = options.container.clientWidth - options.cursor.offsetWidth;
+        const range = options.maxValue - options.minValue;
+        const ratio = (options.event.clientX - offset - rect.left) / width;
+        const value = ratio * range + options.minValue;
+        if(value > options.maxValue){
+            return options.maxValue;
+        }else if(value < options.minValue){
+            return options.minValue;
+        }else{
+            return value;
+        }
+    }
+    
+    function getVerticalSliderPosition(options){
+        const height = options.container.clientHeight - options.cursor.offsetHeight;
+        const range = options.maxValue - options.minValue;
+        const value = options.value - options.minValue;
+        return height * value / range;
+    }
+    function getVerticalSliderValue(options){
+        const rect = options.container.getBoundingClientRect();
+        const offset = options.offset || (options.cursor.offsetHeight * 0.5);
+        const height = options.container.clientHeight - options.cursor.offsetHeight;
+        const range = options.maxValue - options.minValue;
+        const ratio = (options.event.clientY - offset - rect.top) / height;
+        const value = ratio * range + options.minValue;
+        if(value > options.maxValue){
+            return options.maxValue;
+        }else if(value < options.minValue){
+            return options.minValue;
+        }else{
+            return value;
+        }
+    }
+    
+</script>

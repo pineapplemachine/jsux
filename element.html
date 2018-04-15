@@ -1,0 +1,349 @@
+<link rel="import" href="event-spawner.html">
+<link rel="import" href="helpers.html">
+<link rel="import" href="tooltip.html">
+
+<script>
+    
+    class UxElement extends UxEventSpawner{
+        static addNewElementTypeListener(callback){
+            UxElement.newElementTypeListeners.push(callback);
+        }
+        static removeNewElementTypeListener(callback){
+            const index = UxElement.newElementTypeListeners.indexOf(callback);
+            if(index >= 0){
+                UxElement.newElementTypeListeners.splice(index, 1);
+            }
+        }
+        static handleNewElementType(elementType){
+            for(let listener of UxElement.newElementTypeListeners){
+                listener(elementType);
+            }
+        }
+        get element(){
+            return this.rootElement;
+        }
+        get tooltipTargetElement(){
+            return this.rootElement;
+        }
+        show(){
+            this.element.classList.remove("uxElementHidden");
+        }
+        hide(){
+            this.element.classList.add("uxElementHidden");
+        }
+        get visible(){
+            // https://stackoverflow.com/a/33456469
+            return this.element && (
+                this.element.offsetWidth || this.element.offsetHeight ||
+                this.element.getClientRects().length
+            );
+        }
+        setVisibility(value){
+            if(value){
+                return this.show();
+            }else{
+                return this.hide();
+            }
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        stitchSiblings(){
+            if(this.prevSibling){
+                this.prevSibling.nextSibling = this.nextSibling;
+            }
+            if(this.nextSibling){
+                this.nextSibling.prevSibling = this.prevSibling;
+            }
+        }
+        bringToFront(preserveEvents = false){
+            const parentElement = (this.parent ?
+                this.parent.element : this.parentElement
+            );
+            if(this.element && parentElement){
+                const children = parentElement.children;
+                if(this.element === children[children.length - 1]){
+                    return;
+                }
+                if(preserveEvents){
+                    // Move everything EXCEPT this element so that events
+                    // in progress are not disrupted
+                    const moveChildren = Array.prototype.slice.call(children);
+                    for(let child of moveChildren){
+                        if(child !== this.element){
+                            parentElement.insertBefore(child, this.element);
+                        }
+                    }
+                }else{
+                    parentElement.appendChild(this.element);
+                }
+            }
+        }
+        setFormObjects(childrenById, childrenByAttribute){
+            if(childrenById !== this.childrenById){
+                for(let key in this.childrenById){
+                    childrenById[key] = this.childrenById[key];
+                }
+                this.childrenById = childrenById;
+            }
+            if(childrenByAttribute !== this.childrenByAttribute){
+                for(let key in this.childrenByAttribute){
+                    childrenByAttribute[key] = this.childrenByAttribute[key];
+                }
+                this.childrenByAttribute = childrenByAttribute;
+            }
+            if(this.children){
+                for(let child of this.children){
+                    child.setFormObjects(childrenById, childrenByAttribute);
+                }
+            }
+        }
+        get tooltip(){
+            return this.tooltipObject && this.tooltipObject.text;
+        }
+        set tooltip(text){
+            if(this.tooltipObject){
+                if(!text){
+                    this.tooltipObject.remove();
+                }else{
+                    this.tooltipObject.text = text;
+                }
+            }else if(text && this.tooltipTargetElement){
+                this.tooltipObject = new UxTooltip(
+                    this.tooltipTargetElement, text
+                );
+            }
+        }
+        // TODO: use a proxy for neat style updating
+        get style(){
+            return this.styleObject;
+        }
+        constructor(options){
+            super();
+            this.id = options.id;
+            this.attribute = options.attribute;
+            this.parent = undefined;
+            this.parentElement = undefined;
+            this.prevSibling = undefined;
+            this.nextSibling = undefined;
+            this.tooltipObject = undefined;
+            const ctor = this.constructor;
+            if(!UxElement.allElementTypes[ctor.name]){
+                UxElement.allElementTypes[ctor.name] = ctor;
+                UxElement.handleNewElementType(ctor);
+            }
+        }
+        endConstructor(options){
+            if(options.hidden){
+                this.hide();
+            }
+            if(this.element){
+                this.element.classList.add("uxElement");
+            }
+            if(options.id && this.element){
+                this.element.id = options.id;
+            }
+            if(options.addToBody){
+                this.parentElement = document.body;
+                document.body.appendChild(this.element);
+            }
+            if(options.tooltip && this.tooltipTargetElement){
+                this.tooltipObject = new UxTooltip(
+                    this.tooltipTargetElement, options.tooltip
+                );
+            }
+            if(options.onleftclick){
+                this.addEventListener("leftclick", options.onleftclick);
+            }
+            if(options.onclick){
+                this.addEventListener("click", options.onclick);
+            }
+            if(options.onmousedown){
+                this.addEventListener("mousedown", options.onmousedown);
+            }
+            if(options.onmouseup){
+                this.addEventListener("mouseup", options.onmouseup);
+            }
+            if(options.onwheel){
+                this.addEventListener("wheel", options.onwheel);
+            }
+            if(options.onmouseover){
+                this.addEventListener("mouseover", options.onmouseover);
+            }
+            if(options.onmouseout){
+                this.addEventListener("mouseout", options.onmouseout);
+            }
+            if(options.onmouseenter){
+                this.addEventListener("mouseenter", options.onmouseenter);
+            }
+            if(options.onmouseleave){
+                this.addEventListener("mouseleave", options.onmouseleave);
+            }
+            if(options.onkeypress){
+                this.addEventListener("keypress", options.onkeypress);
+            }
+            if(options.onkeydown){
+                this.addEventListener("keydown", options.onkeydown);
+            }
+            if(options.onkeyup){
+                this.addEventListener("keyup", options.onkeyup);
+            }
+            if(options.onchange){
+                this.addEventListener("change", options.onchange);
+            }
+            if(options.oninput){
+                this.addEventListener("input", options.oninput);
+            }
+            if(options.onedit){
+                this.addEventListener("edit", options.onedit);
+            }
+        }
+        *iterateElementTree(){
+            const stack = [this];
+            while(stack.length){
+                const element = stack.pop();
+                yield element;
+                if(element.children){
+                    for(let child of element.children){
+                        stack.push(child);
+                    }
+                }
+            }
+        }
+    }
+    
+    class UxContainerElement extends UxElement{
+        constructor(options){
+            super(options);
+            if(!("children" in this)){
+                this.children = [];
+            }
+            this.childrenById = {};
+            this.childrenByAttribute = {};
+            // TODO: do this better
+            if(!("value" in this)){
+                this.value = this.getValueProxyObject();
+            }
+            this.child = this.getChildProxyObject();
+        }
+        get childContainerElement(){
+            return this.rootElement;
+        }
+        getValueProxyObject(){
+            return new Proxy({}, {
+                get: (target, name) => {
+                    const element = this.childrenByAttribute[name];
+                    return element && element.value;
+                },
+                set: (target, name, value) => {
+                    const element = this.childrenByAttribute[name];
+                    return element && (element.value = value);
+                },
+            });
+        }
+        getChildProxyObject(){
+            return new Proxy({}, {
+                get: (target, name) => {
+                    return this.childrenById[name];
+                },
+            });
+        }
+        getValues(){
+            const result = {};
+            for(let attribute in this.childrenByAttribute){
+                result[attribute] = this.childrenByAttribute[attribute].value;
+            }
+            return result;
+        }
+        getVisibleChildren(){
+            return this.children.filter(child => child.visible);
+        }
+        getFirstVisibleChild(){
+            for(let child of this.children){
+                if(child.visible){
+                    return child;
+                }
+            }
+            return undefined;
+        }
+        add(child){
+            if(!child){
+                // do nothing
+            }else if(typeof child[Symbol.iterator] === "function"){
+                for(let element of child){
+                    this.add(element);
+                }
+            }else{
+                this.addOne(child);
+            }
+            return this;
+        }
+        addOne(child){
+            if(child.parent === this){
+                const index = this.children.indexOf(child);
+                if(index >= 0){
+                    this.children.splice(index, 1);
+                }
+            }
+            this.children.push(child);
+            child.parent = this;
+            child.parentElement = undefined;
+            child.stitchSiblings();
+            child.prevSibling = this.children[this.children.length - 2];
+            if(child.prevSibling){
+                child.prevSibling.nextSibling = child;
+            }
+            child.setFormObjects(
+                this.childrenById, this.childrenByAttribute
+            );
+            if(this.childContainerElement && child.element){
+                this.childContainerElement.appendChild(child.element);
+            }
+            if(child.id){
+                this.childrenById[child.id] = child;
+            }
+            if(child.attribute && "value" in child){
+                this.childrenByAttribute[child.attribute] = child;
+            }
+            return this;
+        }
+        addItems(optionsList){
+            if(!this.addItem){
+                throw new Error(`Cannot add items to ${this.constructor.name}.`);
+            }
+            if(optionsList){
+                for(let options of optionsList){
+                    this.addItem(options);
+                }
+            }
+            return this;
+        }
+        removeAll(){
+            for(let i = this.children.length; i--; i > 0){
+                this.remove(this.children[this.children.length - 1]);
+            }
+        }
+        remove(child){
+            const index = (
+                child.parent === this && this.children.indexOf(child)
+            );
+            if(index >= 0){
+                this.children.splice(index, 1);
+                child.parent = undefined;
+                child.stitchSiblings();
+                this.childContainerElement.removeChild(child.element);
+                if(child.id){
+                    delete this.childrenById[child.id];
+                }
+                if(child.attribute){
+                    delete this.childrenByAttribute[child.attribute];
+                }
+            }
+        }
+    }
+    
+    UxElement.allElementTypes = {};
+    UxElement.newElementTypeListeners = [];
+
+</script>

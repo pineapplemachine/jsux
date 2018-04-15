@@ -1,0 +1,48 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<script>
+
+    class UxText extends UxElement{
+        static css(theme){
+            return `
+            .uxText {
+                display: block;
+                margin: ${theme.elementMargin};
+                line-height: ${theme.lineHeight}px;
+            }
+            `;
+        }
+        get text(){
+            return this.rootElement.innerText;
+        }
+        set text(text){
+            this.rootElement.innerText = text;
+        }
+        center(){
+            this.rootElement.style.textAlign = "center";
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxText",
+                onclick: this.getEventHandler("click"),
+                onmouseover: this.getEventHandler("mouseover"),
+                onmouseout: this.getEventHandler("mouseout"),
+            });
+            this.text = options.text || "";
+            if(options.centered){
+                this.center();
+            }
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

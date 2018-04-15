@@ -1,0 +1,173 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<script>
+
+    class UxTab extends UxContainerElement{
+        static css(theme){
+            const headerHeight = theme.lineHeight + 4;
+            return `
+            .uxTabHeader {
+                display: inline-block;
+                height: ${headerHeight}px;
+                line-height: ${headerHeight}px;
+                background-color: ${theme.middlegroundDark};
+                box-sizing: border-box;
+                padding: 0 8px;
+                border-top-right-radius: 8px;
+                cursor: pointer;
+            }
+            .uxTabHeader:active {
+                background-color: ${theme.middleground};
+            }
+            .uxTabHeaderSelected {
+                background-color: ${theme.middleground};
+            }
+            .uxTabContent {
+                display: none;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .uxTabContentSelected {
+                display: block;
+            }
+            `;
+        }
+        get tooltipTargetElement(){
+            return this.headerElement;
+        }
+        get element(){
+            return this.headerElement;
+        }
+        get childContainerElement(){
+            return this.contentElement;
+        }
+        get selected(){
+            return this.headerElement.classList.contains("uxTabHeaderSelected");
+        }
+        set selected(selected){
+            updateClass("uxTabHeaderSelected", selected, this.headerElement);
+            updateClass("uxTabContentSelected", selected, this.contentElement);
+        }
+        select(){
+            this.parent.select(this);
+            return this;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.headerElement, style && style.header);
+            styleElement(this.contentElement, style && style.content);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.contentElement = createElement({
+                tag: "div",
+                class: "uxTabContent",
+            });
+            this.headerElement = createElement({
+                tag: "div",
+                class: "uxTabHeader",
+                content: options.title,
+                onleftclick: event => {
+                    this.select();
+                },
+            });
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+
+    class UxTabs extends UxContainerElement{
+        static css(theme){
+            return `
+            .uxTabs {
+                display: block;
+                position: relative;
+                margin: ${theme.elementMargin};
+            }
+            .uxTabsHeaderContainer {
+                overflow: hidden;
+            }
+            .uxTabsContentContainer {
+                display: block;
+                width: 100%;
+                box-sizing: border-box;
+                border-style: solid;
+                border-width: 2px;
+                border-color: ${theme.middleground};
+                border-radius: 2px;
+                border-top-left-radius: 0;
+            }
+            `;
+        }
+        get childContainerElement(){
+            return this.headerElement;
+        }
+        get tooltipTargetElement(){
+            return this.headerElement;
+        }
+        select(tab){
+            for(let tab of this.children){
+                tab.headerElement.classList.remove("uxTabHeaderSelected");
+                tab.contentElement.classList.remove("uxTabContentSelected");
+            }
+            if(tab){
+                tab.headerElement.classList.add("uxTabHeaderSelected");
+                tab.contentElement.classList.add("uxTabContentSelected");
+            }
+            return this;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.headerElement, style && style.header);
+            styleElement(this.contentElement, style && style.content);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.children = [];
+            this.headerElement = createElement({
+                tag: "div",
+                class: "uxTabsHeaderContainer",
+                style: options.style && options.style.header,
+            });
+            this.contentElement = createElement({
+                tag: "div",
+                class: "uxTabsContentContainer",
+                style: options.style && options.style.content,
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxTabs",
+                children: [this.headerElement, this.contentElement],
+                style: options.style,
+            });
+            super.endConstructor(options);
+        }
+        tab(options = {}){
+            return this.add(new UxTab(options));
+        }
+        addOne(child){
+            super.addOne(child);
+            if(child.childContainerElement){
+                this.contentElement.appendChild(child.childContainerElement);
+            }
+            if(this.children.length === 1){
+                this.select(child);
+            }
+        }
+        remove(child){
+            super.remove(child);
+            if(child.childContainerElement){
+                this.contentElement.removeChild(child.childContainerElement);
+            }
+            if(child.selected){
+                this.select(this.children[0]);
+            }
+        }
+    }
+    
+</script>

@@ -1,0 +1,35 @@
+<link rel="import" href="theme.html">
+
+<script>
+    
+    const UxDefaultTheme = new UxTheme({
+        background: [0, 0, 0, 0.9],
+        foregroundLight: "#eee",
+        foreground: "#aaa",
+        foregroundDark: "#888",
+        middlegroundLight: "#555",
+        middleground: "#333",
+        middlegroundDark: "#222",
+        accent: "#56a",
+        fontFamily: "Arial, sans-serif",
+        extraCss: theme => `
+            .uxElement {
+                font-size: ${theme.fontSize}px;
+                font-family: ${theme.fontFamily};
+                color: ${theme.foreground};
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+            .uxElementHidden {
+                display: none !important;
+            }
+        `,
+    });
+    
+    UxDefaultTheme.apply();
+    
+</script>

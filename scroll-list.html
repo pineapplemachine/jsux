@@ -1,0 +1,133 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<link rel="import" href="list.html">
+<link rel="import" href="scroll-area.html">
+
+<script>
+    
+    class UxScrollList extends UxContainerElement{
+        static css(theme){
+            return `
+            .uxScrollList {
+                box-sizing: border-box;
+                border-radius: 2px;
+                border-style: solid;
+                border-width: 1px;
+                border-color: ${theme.middleground};
+                margin: ${theme.elementMargin};
+            }
+            .uxScrollList > .uxScrollAreaContent > .uxList {
+                border-width: 0;
+                border-radius: 0;
+                margin: 0;
+            }
+            `;
+        }
+        get element(){
+            return this.scrollAreaElement.element;
+        }
+        get children(){
+            return this.listElement.children;
+        }
+        get childContainerElement(){
+            return this.listElement.childContainerElement;
+        }
+        // UxList
+        get value(){
+            return this.listElement.value;
+        }
+        set value(value){
+            this.listElement.value = value;
+        }
+        filter(filterFunction){
+            return this.listElement.filter(filterFunction);
+        }
+        sort(orderFunction){
+            return this.listElement.sort(orderFunction);
+        }
+        search(searchString){
+            return this.listElement.search(searchString);
+        }
+        get activeItem(){
+            return this.listElement.activeItem;
+        }
+        set activeItem(itemElement){
+            this.listElement.activeItem = itemElement;
+        }
+        moveActiveCursorUp(steps = 1){
+            return this.listElement.moveActiveCursorUp(steps);
+        }
+        moveActiveCursorDown(steps = 1){
+            return this.listElement.moveActiveCursorDown(steps);
+        }
+        moveActiveCursorToTop(){
+            return this.listElement.moveActiveCursorToTop();
+        }
+        moveActiveCursorToBottom(){
+            return this.listElement.moveActiveCursorToBottom();
+        }
+        handleActiveCursorKeyEvent(event){
+            return this.listElement.handleActiveCursorKeyEvent(event);
+        }
+        select(itemElement){
+            return this.listElement.select(itemElement);
+        }
+        selectActiveItem(){
+            return this.listElement.selectActiveItem();
+        }
+        addItem(options){
+            this.listElement.addItem(options);
+            return this;
+        }
+        addOne(child){
+            this.listElement.addOne(child);
+            return this;
+        }
+        remove(child){
+            this.listElement.remove(child);
+            return this;
+        }
+        // UxScrollArea
+        get scroll(){
+            return this.scrollAreaElement.scroll;
+        }
+        set scroll(value){
+            this.scrollAreaElement.scroll = scroll;
+        }
+        get scrollHeight(){
+            return this.scrollAreaElement.scrollHeight;
+        }
+        scrollTo(element){
+            return this.scrollAreaElement.scrollTo(element);
+        }
+        // UxScrollList
+        setStyle(style){
+            // TODO: more sensible styling
+            styleElement(this.scrollAreaElement.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.scrollAreaElement = new UxScrollArea();
+            this.scrollAreaElement.element.classList.add("uxScrollList");
+            this.listElement = new UxList();
+            this.listElement.addEventListener("activecursorup", itemElement => {
+                this.scrollTo(itemElement && itemElement.element);
+            });
+            this.listElement.addEventListener("activecursordown", itemElement => {
+                this.scrollTo(itemElement && itemElement.element);
+            });
+            this.scrollAreaElement.add(this.listElement);
+            // Add initial list items
+            this.addItems(options.items);
+            // Set value and state
+            this.value = options.value;
+            // Set style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

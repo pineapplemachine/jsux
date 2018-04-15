@@ -1,0 +1,123 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+<link rel="import" href="tooltip.html">
+
+<script>
+
+    class UxTextField extends UxElement{
+        static css(theme){
+            return `
+            .uxTextField {
+                display: block;
+                position: relative;
+                height: ${theme.lineHeight}px;
+                line-height: ${theme.lineHeight}px;
+                margin: ${theme.elementMargin};
+            }
+            .uxTextFieldTitle {
+                display: none;
+                vertical-align: middle;
+            }
+            .uxTextFieldWithTitle > .uxTextFieldTitle {
+                display: inline;
+            }
+            .uxTextFieldInput {
+                float: right;
+                display: block;
+                box-sizing: border-box;
+                width: 100%;
+                height: ${theme.lineHeight}px;
+                line-height: ${theme.lineHeight}px;
+                padding: 0 6px;
+                overflow: hidden;
+                background-color: ${theme.middleground};
+                border-width: 1px;
+                border-style: solid;
+                border-color: transparent;
+                color: ${theme.foreground};
+                font-size: ${theme.smallFontSize};
+                border-radius: 2px;
+            }
+            .uxTextFieldInput::selection {
+                background: ${theme.accent};
+            }
+            .uxTextFieldInput:hover {
+                border-color: ${theme.middlegroundLight};
+            }
+            .uxTextFieldInput::placeholder {
+                opacity: 1;
+                color: ${theme.foregroundDark};
+            }
+            .uxTextFieldWithTitle > .uxTextFieldInput {
+                width: 200px;
+            }
+            `;
+        }
+        get tooltipTargetElement(){
+            return this.titleElement;
+        }
+        get element(){
+            return this.rootElement;
+        }
+        get value(){
+            return this.inputElement.value;
+        }
+        set value(value){
+            this.inputElement.value = value;
+        }
+        get title(){
+            return this.titleElement.innerText;
+        }
+        set title(title){
+            this.titleElement.innerText = title;
+            updateClass("uxTextFieldWithTitle", title, this.rootElement);
+        }
+        get placeholder(){
+            return this.inputElement.placeholder;
+        }
+        set placeholder(placeholder){
+            this.inputElement.placeholder = placeholder;
+        }
+        focus(){
+            this.inputElement.focus();
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.titleElement, style && style.title);
+            styleElement(this.inputElement, style && style.input);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.titleElement = createElement({
+                tag: "div",
+                class: "uxTextFieldTitle",
+            });
+            this.inputElement = createElement({
+                tag: "input",
+                type: "text",
+                class: "uxTextFieldInput",
+                onchange: this.getEventHandler("change", event),
+                oninput: this.getEventHandler("input", event),
+                onkeydown: this.getEventHandler("keydown", event),
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxTextField",
+                children: [
+                    this.titleElement,
+                    this.inputElement
+                ],
+            });
+            // Set initial state
+            this.title = options.title;
+            this.placeholder = options.placeholder;
+            this.value = options.value || "";
+            // Styling and such
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

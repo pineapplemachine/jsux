@@ -1,0 +1,55 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<script>
+
+    class UxButton extends UxElement{
+        static css(theme){
+            return `
+            .uxButton {
+                display: block;
+                text-align: center;
+                height: ${theme.lineHeight}px;
+                line-height: ${theme.lineHeight}px;
+                margin: ${theme.elementMargin};
+                border-radius: 2px;
+                background-color: ${theme.middleground};
+                box-sizing: border-box;
+                cursor: pointer;
+                border-style: solid;
+                border-width: 1px;
+                border-color: transparent;
+            }
+            .uxButton:hover {
+                border-color: ${theme.middlegroundLight};
+            }
+            .uxButton:active {
+                background-color: ${theme.middlegroundDark};
+            }
+            `;
+        }
+        get text(){
+            return this.rootElement.innerText;
+        }
+        set text(text){
+            this.rootElement.innerText = text;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxButton",
+                onclick: this.getEventHandler("click"),
+            })
+            this.text = options.text || "";
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

@@ -1,0 +1,17 @@
+<script>
+    
+    class UxEventListener{
+        constructor(owner, eventName, callback){
+            this.owner = owner;
+            this.eventName = eventName;
+            this.callback = callback;
+            this.active = true;
+        }
+        handleEvent(eventObject){
+            if(this.active){
+                return this.callback.call(this.owner, eventObject);
+            }
+        }
+    }
+    
+</script>

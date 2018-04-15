@@ -1,0 +1,264 @@
+<script>
+    
+    class UxColor{
+        static writeHex(red, green, blue){
+        }
+        static parseHex(color){
+        }
+        get sanitizedRed(){
+            return Math.max(0, Math.min(255, Math.round(this.red)));
+        }
+        get sanitizedGreen(){
+            return Math.max(0, Math.min(255, Math.round(this.green)));
+        }
+        get sanitizedBlue(){
+            return Math.max(0, Math.min(255, Math.round(this.blue)));
+        }
+        get sanitizedAlpha(){
+            return Math.max(0, Math.min(1, this.alpha));
+        }
+        get min(){
+            return Math.min(this.red, this.green, this.blue);
+        }
+        get max(){
+            return Math.max(this.red, this.green, this.blue);
+        }
+        get low(){
+            return Math.min(0, this.red, this.green, this.blue);
+        }
+        get high(){
+            return Math.max(255, this.red, this.green, this.blue);
+        }
+        normalize(){
+            const low = this.low;
+            const high = this.high;
+            const range = high - low;
+            return new UxColor(
+                (this.red - low) / range * 255,
+                (this.green - low) / range * 255,
+                (this.blue - low) / range * 255,
+                this.alpha && Math.max(0, Math.min(1, this.alpha))
+            );
+        }
+        static hsl(hexHue, saturation, lightness, alpha){
+            let r = lightness;
+            let g = lightness;
+            let b = lightness;
+            const h = hexHue / 60;
+            if(h < 1){ // red - yellow
+                r += saturation / 2;
+                g += saturation / 2 * h;
+                b -= saturation / 2;
+            }else if(h < 2){ // yellow - green
+                r += saturation / 2 * (2 - h);
+                g += saturation / 2;
+                b -= saturation / 2;
+            }else if(h < 3){ // green - cyan
+                r -= saturation / 2;
+                g += saturation / 2;
+                b += saturation / 2 * (h - 2);
+            }else if(h < 4){ // cyan - blue
+                r -= saturation / 2;
+                g += saturation / 2 * (4 - h);
+                b += saturation / 2;
+            }else if(h < 5){ // blue - magenta
+                r += saturation / 2 * (h - 4);
+                g -= saturation / 2;
+                b += saturation / 2;
+            }else{ // magenta - red
+                r += saturation / 2;
+                g -= saturation / 2;
+                b += saturation / 2 * (6 - h);
+            }
+            return new UxColor(r, g, b, alpha);
+        }
+        // get hue(){ // Hue as circular degrees
+        //     return Math.atan2(
+        //         this.green - this.blue,
+        //         this.red - this.green
+        //     ) * 180 / Math.pi;
+        // }
+        get hue(){ // Hue as hexagonal degrees
+            const min = Math.min(0, this.red, this.green, this.blue);
+            const max = Math.max(255, this.red, this.green, this.blue);
+            const r = (this.red - min) / (max - min);
+            const g = (this.green - min) / (max - min);;
+            const b = (this.blue - min) / (max - min);;
+            if(r >= g && r >= b){
+                if(g >= b){ // red - yellow
+                    return 60 * (g - b) / (r - b);
+                }else{ // magenta - red
+                    return 60 * (6 - (b - g) / (r - g));
+                }
+            }else if(g >= b){
+                if(r >= b){ // yellow - green
+                    return 60 * (2 - (r - b) / (g - b));
+                }else{ // green - cyan
+                    return 60 * (2 + (b - r) / (g - r));
+                }
+            }else{
+                if(r >= g){ // blue - magenta
+                    return 60 * (4 + (r - g) / (b - g));
+                }else{ // cyan - blue
+                    return 60 * (4 - (g - r) / (b - r));
+                }
+            }
+        }
+        get saturation(){
+            return this.max - this.min;
+        }
+        get lightness(){
+            return 0.5 * (this.max + this.min);
+        }
+        get average(){
+            return (this.red + this.green + this.blue) / 3;
+        }
+        get chroma(){
+            return (
+                Math.abs(this.red - this.green) +
+                Math.abs(this.green - this.blue) +
+                Math.abs(this.blue - this.red)
+            ) / 3;
+        }
+        get luma(){
+            return Math.max(0, Math.min(255, (
+                this.red * 0.28125 +
+                this.green * 0.59375 +
+                this.blue * 0.125
+            )) / 255);
+        }
+        get hex(){
+            const red = this.sanitizedRed;
+            const green = this.sanitizedGreen;
+            const blue = this.sanitizedBlue;
+            const redString = Math.round(red).toString(16);
+            const greenString = Math.round(green).toString(16);
+            const blueString = Math.round(blue).toString(16);
+            return "#" + (
+                `${red < 16 ? "0" : ""}${redString}` +
+                `${green < 16 ? "0" : ""}${greenString}` +
+                `${blue < 16 ? "0" : ""}${blueString}`
+            );
+        }
+        set hex(color){
+            if(color.startsWith("#")){
+                color = color.slice(1);
+            }
+            if(color.length >= 6){
+                this.red = parseInt(color.slice(0, 2), 16);
+                this.green = parseInt(color.slice(2, 4), 16);
+                this.blue = parseInt(color.slice(4, 6), 16);
+            }else if(color.length >= 3){
+                const digits = "0123456789ABCDEF";
+                this.red = digits.indexOf(color[0].toUpperCase()) * 17;
+                this.green = digits.indexOf(color[1].toUpperCase()) * 17;
+                this.blue = digits.indexOf(color[2].toUpperCase()) * 17;
+            }else{
+                this.red = 0;
+                this.green = 0;
+                this.blue = 0;
+            }
+        }
+        get css(){
+            return this.alpha === undefined ? this.hex : ("rgba(" +
+                this.sanitizedRed + "," +
+                this.sanitizedGreen + "," +
+                this.sanitizedBlue + "," +
+                this.sanitizedAlpha +
+            ")");
+        }
+        toString(){
+            return this.css;
+        }
+        multiply(value){
+            if(value instanceof UxColor){
+                return new UxColor(
+                    this.red * value.red / 255,
+                    this.green * value.green / 255,
+                    this.blue * value.blue / 255,
+                    (this.alpha && value.alpha ? 
+                        this.alpha * value.alpha :
+                        this.alpha || value.alpha
+                    )
+                );
+            }else{
+                return new UxColor(
+                    this.red * value,
+                    this.green * value,
+                    this.blue * value,
+                    this.alpha
+                );
+            }
+        }
+        screen(value){
+            if(value instanceof UxColor){
+                return new UxColor(
+                    255 - ((255 - this.red) * (255 - value.red) / 255),
+                    255 - ((255 - this.green) * (255 - value.green) / 255),
+                    255 - ((255 - this.blue) * (255 - value.blue) / 255),
+                    (this.alpha && value.alpha ? 
+                        this.alpha * value.alpha :
+                        this.alpha || value.alpha
+                    )
+                );
+            }else{
+                return new UxColor(
+                    255 - (255 - this.red) * (1 - value),
+                    255 - (255 - this.green) * (1 - value),
+                    255 - (255 - this.blue) * (1 - value),
+                    this.alpha
+                );
+            }
+        }
+        blend(t, color){
+            return new UxColor(
+                this.red * t + color.red * (1 - t),
+                this.green * t + color.green * (1 - t),
+                this.blue * t + color.blue * (1 - t),
+                (this.alpha !== undefined && color.alpha !== undefined ?
+                    this.alpha * t + color.alpha * (1 - t) :
+                    this.alpha || color.alpha
+                )
+            );
+        }
+        constructor(red, green = undefined, blue = undefined, alpha = undefined){
+            if(red !== undefined && green === undefined && blue === undefined){
+                const color = red;
+                if(color instanceof Array){
+                    this.red = color[0];
+                    this.green = color[1];
+                    this.blue = color[2];
+                    this.alpha = color[3];
+                }else if(typeof(color) === "string"){
+                    this.hex = color;
+                    this.alpha = alpha;
+                }else if(typeof(color) === "number"){
+                    this.red = color;
+                    this.green = color;
+                    this.blue = color;
+                }else{
+                    this.red = color.red;
+                    this.green = color.green;
+                    this.blue = color.blue;
+                    this.alpha = color.alpha;
+                }
+            }else{
+                this.red = red;
+                this.green = green;
+                this.blue = blue;
+                this.alpha = alpha;
+            }
+        }
+    }
+    
+    UxColor.Black = new UxColor(0, 0, 0);
+    UxColor.White = new UxColor(255, 255, 255);
+    UxColor.Gray = new UxColor(128, 128, 128);
+    UxColor.Red = new UxColor(255, 0, 0);
+    UxColor.Green = new UxColor(0, 255, 0);
+    UxColor.Blue = new UxColor(0, 0, 255);
+    UxColor.Yellow = new UxColor(255, 255, 0);
+    UxColor.Cyan = new UxColor(0, 255, 255);
+    UxColor.Magenta = new UxColor(255, 0, 255);
+
+</script>

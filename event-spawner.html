@@ -1,0 +1,66 @@
+<link rel="import" href="event-listener.html">
+
+<script>
+    
+    class UxEventSpawner{
+        constructor(){
+            this.eventListeners = {};
+        }
+        handleEvent(eventName, eventObject){
+            const listenerList = this.eventListeners[eventName];
+            if(listenerList){
+                for(let listener of listenerList){
+                    const result = listener.handleEvent(eventObject);
+                    if(result === false){
+                        return result;
+                    }
+                }
+            }
+        }
+        getEventHandler(eventName){
+            return eventObject => {
+                this.handleEvent(eventName, eventObject);
+            };
+        }
+        addEventListener(eventName, callback){
+            if(eventName instanceof UxEventListener){
+                const listener = eventName;
+                if(!this.eventListeners[listener.eventName]){
+                    this.eventListeners[listener.eventName] = [listener];
+                }else{
+                    this.eventListeners[listener.eventName].push(listener);
+                }
+                return listener;
+            }else if(eventName === "leftclick"){
+                return this.addEventListener("click", function(event){
+                    if(event.button === 0 && !event.ctrlKey){
+                        return callback.call(this, event);
+                    }
+                });
+            }else{
+                return this.addEventListener(
+                    new UxEventListener(this, eventName, callback)
+                );
+            }
+        }
+        removeEventListener(eventName, callback){
+            if(eventName instanceof UxEventListener){
+                const listener = eventName;
+                const listenerList = this.eventListeners[listener.eventName];
+                const index = listenerList.indexOf(listener);
+                if(index >= 0){
+                    listenerList.splice(index, 1);
+                }
+            }else{
+                const listenerList = this.eventListeners[eventName];
+                const index = listenerList.findIndex(listener => {
+                    return callback === listener.callback;
+                });
+                if(index >= 0){
+                    listenerList.splice(index, 1);
+                }
+            }
+        }
+    }
+    
+</script>

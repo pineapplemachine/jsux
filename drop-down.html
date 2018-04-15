@@ -1,0 +1,272 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+<link rel="import" href="tooltip.html">
+
+<script>
+    
+    class UxDropDownItem extends UxElement{
+        static css(theme){
+            return `
+            .uxDropDownItem {
+                display: block;
+                background-color: transparent;
+                height: ${theme.lineHeight}px;
+                line-height: ${theme.lineHeight}px;
+                padding: 0 6px;
+                cursor: pointer;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+            .uxDropDownItem:hover {
+                background-color: ${theme.middleground};
+            }
+            .uxDropDownItem:active {
+                background-color: ${theme.middleground};
+            }
+            `;
+        }
+        get title(){
+            return this.rootElement.innerText;
+        }
+        set title(title){
+            this.rootElement.innerText = title;
+        }
+        select(){
+            this.parent.select(this);
+            return this;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxDropDownItem",
+                onclick: this.getEventHandler("click"),
+                onmouseover: this.getEventHandler("mouseover"),
+                onmouseout: this.getEventHandler("mouseout"),
+            });
+            // Set state
+            this.title = options.title;
+            this.value = options.value;
+            // Apply styles
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+
+    class UxDropDown extends UxContainerElement{
+        static css(theme){
+            return `
+            .uxDropDown {
+                position: relative;
+                display: block;
+                height: ${theme.lineHeight}px;
+                line-height: ${theme.lineHeight}px;
+                margin: ${theme.elementMargin};
+            }
+            .uxDropDownTitle {
+                display: none;
+                vertical-align: middle;
+                line-height: ${theme.lineHeight}px;
+            }
+            .uxDropDownWithTitle > .uxDropDownTitle {
+                display: inline;
+            }
+            .uxDropDownBody {
+                position: relative;
+                width: 100%;
+                height: ${theme.lineHeight}px;
+                background-color: ${theme.middleground};
+                box-sizing: border-box;
+                border-radius: 2px;
+                border-style: solid;
+                border-width: 1px;
+                border-color: transparent;
+                cursor: pointer;
+            }
+            .uxDropDownBody:hover {
+                border-color: ${theme.middlegroundLight};
+            }
+            .uxDropDownBody:hover > .uxDropDownButton {
+                background-color: ${theme.middlegroundLight};
+            }
+            .uxDropDownWithTitle > .uxDropDownBody {
+                float: right;
+                width: 200px;
+            }
+            .uxDropDownExpanded > .uxDropDownBody {
+                border-bottom-width: 0;
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+            .uxDropDownButton {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: ${theme.lineHeight - 2}px;
+                height: ${theme.lineHeight - 1}px;
+                background-color: transparent;
+            }
+            .uxDropDownButton:after {
+                content: "▼";
+                line-height: ${theme.lineHeight - 2}px;
+                margin-left: 6px;
+                font-size: 14px;
+            }
+            .uxDropDownValue {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 6px;
+                right: ${theme.lineHeight}px;
+                line-height: ${theme.lineHeight}px;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+            .uxDropDownList {
+                display: none;
+                position: absolute;
+                left: -1px;
+                right: -1px;
+                top: 25px;
+                z-index: 100;
+                background-color: ${theme.middlegroundDark};
+                border-color: ${theme.middlegroundDark};
+                border-style: solid;
+                border-width: 1px;
+                border-top-width: 0;
+                border-bottom-left-radius: 2px;
+                border-bottom-right-radius: 2px;
+            }
+            .uxDropDownExpanded > .uxDropDownBody > .uxDropDownList {
+                display: block;
+            }
+            .uxDropDownBody:hover > .uxDropDownList {
+                border-color: ${theme.middlegroundLight};
+            }
+            `;
+        }
+        get childContainerElement(){
+            return this.listElement;
+        }
+        get tooltipTargetElement(){
+            return this.titleElement;
+        }
+        get value(){
+            return this.selectedItem && this.selectedItem.value;
+        }
+        set value(value){
+            if(value !== this.value){
+                for(let itemElement of this.children){
+                    if(itemElement.value === value){
+                        return this.select(itemElement);
+                    }
+                }
+                return this.select(undefined);
+            }
+        }
+        get title(){
+            return this.titleElement.innerText;
+        }
+        set title(title){
+            this.titleElement.innerText = title;
+            updateClass("uxDropDownWithTitle", title, this.rootElement);
+        }
+        get expanded(){
+            return this.rootElement.classList.contains("uxDropDownExpanded");
+        }
+        set expanded(expanded){
+            updateClass("uxDropDownExpanded", expanded, this.rootElement);
+        }
+        select(itemElement){
+            if(itemElement !== this.selectedItem){
+                if(this.selectedItem){
+                    this.selectedItem.selected = false;
+                }
+                if(itemElement){
+                    itemElement.selected = true;
+                }
+                this.selectedItem = itemElement;
+                this.valueElement.innerText = itemElement.title;
+                this.handleEvent("change", this);
+            }
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.titleElement, style && style.title);
+            styleElement(this.listElement, style && style.list);
+            styleElement(this.valueElement, style && style.selection);
+            styleElement(this.bodyElement, style && style.body);
+            styleElement(this.buttonElement, style && style.button);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.onchange = options.onchange;
+            this.titleElement = createElement({
+                tag: "div",
+                class: "uxDropDownTitle",
+            });
+            this.listElement = createElement({
+                tag: "div",
+                class: "uxDropDownList",
+            });
+            this.valueElement = createElement({
+                tag: "div",
+                class: "uxDropDownValue",
+                content: "[No options available]",
+            });
+            this.buttonElement = createElement({
+                tag: "div",
+                class: "uxDropDownButton",
+            });
+            this.bodyElement = createElement({
+                tag: "div",
+                class: "uxDropDownBody",
+                children: [
+                    this.valueElement,
+                    this.buttonElement,
+                    this.listElement,
+                ],
+                onleftclick: event => {
+                    this.expanded = !this.expanded;
+                    event.handledByDropDownBody = true;
+                },
+            });
+            window.addEventListener("click", event => {
+                if(!event.handledByDropDownBody){
+                    this.expanded = false;
+                }
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxDropDown",
+                children: [
+                    this.titleElement,
+                    this.bodyElement,
+                ],
+            });
+            // Add items
+            this.addItems(options.items);
+            // Set state
+            this.title = options.title;
+            this.select(this.children[0]);
+            // Apply style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+        addItem(options){
+            return this.addOne(new UxDropDownItem(options));
+        }
+        addOne(child){
+            child.addEventListener("leftclick", event => {
+                this.select(child);
+            });
+            return super.addOne(child);
+        }
+    }
+    
+</script>

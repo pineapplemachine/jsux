@@ -1,0 +1,225 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<link rel="import" href="slider-helper.html">
+
+<script>
+
+    class UxSlider extends UxElement{
+        static css(theme){
+            const innerHeight = theme.lineHeight - 4;
+            return `
+            .uxSlider {
+                display: block;
+                text-align: center;
+                height: ${theme.lineHeight}px;
+                line-height: ${theme.lineHeight}px;
+                margin: ${theme.elementMargin};
+            }
+            .uxSliderTitleLeft {
+                display: none;
+                float: left;
+                text-align: left;
+            }
+            .uxSliderTitleRight {
+                display: none;
+                float: right;
+                text-align: right;
+            }
+            .uxSliderWithTitleLeft > .uxSliderTitleLeft {
+                display: inline-block;
+            }
+            .uxSliderWithTitleRight > .uxSliderTitleRight {
+                display: inline-block;
+            }
+            .uxSliderBody {
+                position: relative;
+                display: inline-block;
+                background-color: ${theme.middleground};
+                border-radius: ${theme.lineHeight / 2}px;
+                width: 100%;
+                height: ${theme.lineHeight}px;
+                border-style: solid;
+                border-width: 2px;
+                border-color: transparent;
+                box-sizing: border-box;
+                cursor: pointer;
+            }
+            .uxSliderWithTitleLeft > .uxSliderBody {
+                width: 60%;
+                float: right;
+            }
+            .uxSliderWithTitleRight > .uxSliderBody {
+                width: 60%;
+                float: left;
+            }
+            .uxSliderWithTitleLeft.uxSliderWithTitleRight > .uxSliderBody {
+                width: 60%;
+                float: none;
+                text-align: center;
+            }
+            .uxSliderCursor {
+                position: absolute;
+                left: 0;
+                top: 0;
+                background-color: ${theme.middlegroundLight};
+                width: ${innerHeight}px;
+                height: ${innerHeight}px;
+                border-radius: ${innerHeight / 2}px;
+            }
+            .uxSliderBody:hover > .uxSliderCursor {
+                background-color: ${theme.foreground};
+            }
+            .uxSliderBody:active > .uxSliderCursor {
+                background-color: ${theme.foreground};
+            }
+            .uxSliderValue {
+                display: none;
+                position: absolute;
+                text-align: right;
+                width: 100%;
+                top: 0;
+                left: 0;
+                padding: 0 ${innerHeight / 2}px;
+                line-height: ${innerHeight}px;
+                font-size: ${theme.smallFontSize}px;
+                text-align: right;
+                box-sizing: border-box;
+            }
+            .uxSlider:hover > .uxSliderBody > .uxSliderValue {
+                display: block;
+                color: ${theme.foregroundDark};
+            }
+            .uxSlider:active > .uxSliderBody > .uxSliderValue {
+                display: block;
+                color: ${theme.foreground};
+            }
+            .uxSliderWithCursorRight > .uxSliderBody > .uxSliderValue {
+                width: 0;
+                transition: width 0.5s ease;
+            }
+            .uxSliderWithCursorLeft > .uxSliderBody > .uxSliderValue {
+                width: 100%;
+                transition: width 0.5s ease;
+            }
+            `;
+        }
+        get value(){
+            return (this.integerValue ?
+                Math.round(this.valueSlider.value) : this.valueSlider.value
+            );
+        }
+        set value(value){
+            this.valueSlider.value = value;
+        }
+        get min(){
+            return this.minValue;
+        }
+        set min(min){
+            this.minValue = min;
+        }
+        get max(){
+            return this.maxValue;
+        }
+        set max(max){
+            this.maxValue = max;
+        }
+        get integer(){
+            return this.integerValue;
+        }
+        set integer(value){
+            this.integerValue = value;
+        }
+        get titleLeft(){
+            return this.leftTitleElement.innerText;
+        }
+        set titleLeft(title){
+            this.leftTitleElement.innerText = title;
+            updateClass("uxSliderWithTitleLeft", title, this.rootElement);
+        }
+        get titleRight(){
+            return this.rightTitleElement.innerText;
+        }
+        set titleRight(title){
+            this.rightTitleElement.innerText = title;
+            updateClass("uxSliderWithTitleRight", title, this.rootElement);
+        }
+        updateValueText(){
+            this.valueElement.innerText = (this.integerValue ?
+                Math.round(this.value) : this.value.toFixed(2)
+            );
+            const range = this.maxValue - this.minValue;
+            const ratio = (this.value - this.minValue) / range;
+            if(ratio > 0.75){
+                this.rootElement.classList.add("uxSliderWithCursorRight");
+                this.rootElement.classList.remove("uxSliderWithCursorLeft");
+            }else if(ratio < 0.25){
+                this.rootElement.classList.add("uxSliderWithCursorLeft");
+                this.rootElement.classList.remove("uxSliderWithCursorRight");
+            }
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.integerValue = options.integer || false;
+            // Add elements
+            this.leftTitleElement = createElement({
+                tag: "div",
+                class: "uxSliderTitleLeft",
+            });
+            this.rightTitleElement = createElement({
+                tag: "div",
+                class: "uxSliderTitleRight",
+            });
+            this.cursorElement = createElement({
+                tag: "div",
+                class: "uxSliderCursor",
+            });
+            this.valueElement = createElement({
+                tag: "div",
+                class: "uxSliderValue",
+            });
+            this.bodyElement = createElement({
+                tag: "div",
+                class: "uxSliderBody",
+                children: [this.valueElement, this.cursorElement],
+            });
+            this.valueSlider = new Slider({
+                horizontal: true,
+                container: this.bodyElement,
+                cursor: this.cursorElement,
+                minValue: () => this.minValue,
+                maxValue: () => this.maxValue,
+                onchange: (value, position) => {
+                    this.updateValueText(value);
+                    this.cursorElement.style.left = position;
+                },
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxSlider",
+                children: [
+                    this.leftTitleElement,
+                    this.bodyElement,
+                    this.rightTitleElement,
+                ],
+            });
+            this.titleLeft = options.titleLeft;
+            this.titleRight = options.titleRight;
+            // Handle initial value state
+            this.minValue = options.min || 0;
+            this.maxValue = options.max || 1;
+            this.value = options.value || (
+                0.5 * (this.maxValue - this.minValue)
+            );
+            // Set style, then all done!
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

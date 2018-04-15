@@ -1,0 +1,158 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+<link rel="import" href="tooltip.html">
+
+<script>
+    
+    class UxSection extends UxContainerElement{
+        static css(theme){
+            const headerHeight = theme.lineHeight - 6;
+            return `
+            .uxSection {
+                display: block;
+                position: relative;
+                margin: ${theme.elementMargin};
+                box-sizing: border-box;
+                border-style: solid;
+                border-width: 1px;
+                border-color: ${theme.middleground};
+                border-radius: 2px;
+                overflow: hidden;
+            }
+            .uxSectionHeader {
+                display: none;
+                position: relative;
+                left: 0;
+                right: 0;
+                top: 0;
+                height: ${headerHeight}px;
+                font-size: ${theme.smallFontSize}px;
+                line-height: ${headerHeight}px;
+                background-color: ${theme.middleground};
+            }
+            .uxSectionWithTitle > .uxSectionHeader {
+                display: block;
+            }
+            .uxSectionCollapsible > .uxSectionHeader {
+                display: block;
+            }
+            .uxSectionTitle {
+                display: inline-block;
+                margin-left: 12px;
+            }
+            .uxSectionCollapseIcon {
+                display: none;
+                float: right;
+                width: ${headerHeight}px;
+                height: ${headerHeight}px;
+            }
+            .uxSectionCollapseIcon:hover {
+                background-color: ${theme.middlegroundLight};
+            }
+            .uxSectionCollapseIcon:active {
+                background-color: ${theme.middleground};
+            }
+            .uxSectionCollapseIcon:after {
+                content: "▼";
+                display: block;
+                width: ${headerHeight}px;
+                height: ${headerHeight}px;
+                line-height: ${headerHeight}px;
+                text-align: center;
+                font-size: ${headerHeight * 0.6}px;
+            }
+            .uxSectionCollapsible > .uxSectionHeader > .uxSectionCollapseIcon {
+                display: block;
+            }
+            .uxSectionContent {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                box-sizing: border-box;
+            }
+            .uxSectionWithTitle > .uxSectionContent {
+                height: calc(100% - ${headerHeight}px);
+            }
+            .uxSectionCollapsed > .uxSectionContent {
+                display: none;
+            }
+            `;
+        }
+        get childContainerElement(){
+            return this.contentElement;
+        }
+        get tooltipTargetElement(){
+            return this.headerElement;
+        }
+        get title(){
+            return this.titleElement.innerText;
+        }
+        set title(title){
+            this.titleElement.innerText = title;
+            updateClass("uxSectionWithTitle", title, this.rootElement);
+        }
+        get collapsible(){
+            return this.rootElement.classList.contains("uxSectionCollapsible");
+        }
+        set collapsible(collapsible){
+            updateClass("uxSectionCollapsible", collapsible, this.rootElement);
+        }
+        get collapsed(){
+            return this.rootElement.classList.contains("uxSectionCollapsed");
+        }
+        set collapsed(collapsed){
+            updateClass("uxSectionCollapsed", collapsed, this.rootElement);
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.titleElement, style && style.title);
+            styleElement(this.headerElement, style && style.header);
+            styleElement(this.contentElement, style && style.content);
+            styleElement(this.collapseButtonElement, style && style.collapseIcon);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.collapseButtonElement = createElement({
+                tag: "div",
+                class: "uxSectionCollapseIcon",
+                onleftclick: event => {
+                    toggleClass("uxSectionCollapsed", this.rootElement);
+                },
+            });
+            this.titleElement = createElement({
+                tag: "div",
+                class: "uxSectionTitle",
+            });
+            this.headerElement = createElement({
+                tag: "div",
+                class: "uxSectionHeader",
+                children: [
+                    this.titleElement,
+                    this.collapseButtonElement,
+                ],
+            });
+            this.contentElement = createElement({
+                tag: "div",
+                class: "uxSectionContent",
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxSection",
+                children: [
+                    this.headerElement,
+                    this.contentElement,
+                ],
+            });
+            // Set state and properties
+            this.title = options.title;
+            this.collapsible = options.collapsible;
+            this.collapsed = options.collapsed;
+            // Set style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

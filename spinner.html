@@ -1,0 +1,315 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<script>
+
+    class UxSpinner extends UxElement{
+        static css(theme){
+            const halfLineHeight = theme.lineHeight / 2;
+            return `
+            .uxSpinner {
+                position: relative;
+                display: block;
+                height: ${theme.lineHeight}px;
+                line-height: ${theme.lineHeight}px;
+                margin: ${theme.elementMargin};
+            }
+            .uxSpinnerTitle {
+                display: none;
+                text-align: left;
+            }
+            .uxSpinnerWithTitle > .uxSpinnerTitle {
+                display: inline-block;
+            }
+            .uxSpinnerBody {
+                display: inline-block;
+                position: relative;
+                width: 100%;
+                height: ${theme.lineHeight}px;
+                float: right;
+                border-radius: 2px;
+                overflow: hidden;
+                border-style: solid;
+                border-width: 1px;
+                border-color: ${theme.middleground};
+                box-sizing: border-box;
+            }
+            .uxSpinnerWithTitle > .uxSpinnerBody {
+                width: 100px;
+            }
+            .uxSpinnerBody:hover {
+                border-color: ${theme.middlegroundLight};
+            }
+            .uxSpinnerInput {
+                display: block;
+                box-sizing: border-box;
+                width: calc(100% - ${halfLineHeight}px);
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: ${theme.halfLineHeight}px;
+                line-height: ${theme.lineHeight}px;
+                padding: 0 6px;
+                font-size: ${theme.smallFontSize};
+                overflow: hidden;
+                border-width: 0;
+                border-style: none;
+                color: ${theme.foreground};
+                background-color: ${theme.middleground};
+            }
+            .uxSpinnerUnit {
+                display: none;
+                position: absolute;
+                top: 0;
+                right: 17px;
+                font-size: ${theme.smallFontSize};
+                line-height: ${theme.lineHeight}px;
+                color: ${theme.foregroundDark};
+            }
+            .uxSpinnerWithUnit > .uxSpinnerBody > .uxSpinnerUnit {
+                display: block;
+            }
+            .uxSpinnerStepUp, .uxSpinnerStepDown {
+                width: ${halfLineHeight}px;
+                height: ${halfLineHeight}px;
+                line-height: ${halfLineHeight}px;
+                font-size: 10px;
+                text-align: center;
+                box-sizing: border-box;
+            }
+            .uxSpinnerStepUp:hover, .uxSpinnerStepDown:hover {
+                background-color: ${theme.middlegroundLight};
+            }
+            .uxSpinnerStepUp:active, .uxSpinnerStepDown:active {
+                background-color: ${theme.middleground};
+            }
+            .uxSpinnerStepUp {
+                display: block;
+                position: absolute;
+                top: 0;
+                right: 0;
+                background-color: ${theme.middleground};
+            }
+            .uxSpinnerStepDown {
+                display: block;
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                background-color: ${theme.middleground};
+            }
+            .uxSpinnerStepUp:after {
+                content: "▲";
+                width: ${halfLineHeight}px;
+                height: ${halfLineHeight}px;
+                line-height: ${halfLineHeight}px;
+                text-align: center;
+                margin-right: -1px;
+                margin-top: -1px;
+            }
+            .uxSpinnerStepDown:after {
+                content: "▼";
+                width: ${halfLineHeight}px;
+                height: ${halfLineHeight}px;
+                line-height: ${halfLineHeight}px;
+                text-align: center;
+                margin-right: -1px;
+                margin-top: +1px;
+            }
+            `;
+        }
+        get tooltipTargetElement(){
+            return this.titleElement;
+        }
+        get value(){
+            let number = +this.inputElement.value;
+            if(this.minValue){
+                number = Math.max(this.minValue, number);
+            }
+            if(this.maxValue){
+                number = Math.min(this.maxValue, number);
+            }
+            return number;
+        }
+        set value(value){
+            let number = +value || 0;
+            if(this.minValue){
+                number = Math.max(this.minValue, number);
+            }
+            if(this.maxValue){
+                number = Math.min(this.maxValue, number);
+            }
+            this.inputElement.value = number;
+        }
+        get min(){
+            return this.minValue;
+        }
+        set min(min){
+            this.minValue = min;
+        }
+        get max(){
+            return this.maxValue;
+        }
+        set max(max){
+            this.maxValue = max;
+        }
+        get step(){
+            return this.stepValue;
+        }
+        set step(value){
+            this.stepValue = value;
+            this.stepValueLog = Math.log10(value);
+            this.stepValuePow10 = 10 ** Math.floor(-this.stepValueLog);
+        }
+        get title(){
+            return this.titleElement.innerText;
+        }
+        set title(title){
+            this.titleElement.innerText = title;
+            updateClass("uxSpinnerWithTitle", title, this.rootElement);
+        }
+        get unit(){
+            return this.unitElement.innerText;
+        }
+        set unit(unit){
+            this.unitElement.innerText = unit;
+            updateClass("uxSpinnerWithUnit", unit, this.rootElement);
+        }
+        stepUp(){
+            // Fancy math attempts to take care of rounding errors for
+            // steps with fractional parts
+            const value = this.value + this.stepValue;
+            if(this.stepValueLog >= 0){
+                this.value = value;
+            }else{
+                this.value = (
+                    Math.round(value * this.stepValuePow10) /
+                    this.stepValuePow10
+                );
+            }
+        }
+        stepDown(){
+            // Fancy math attempts to take care of rounding errors for
+            // steps with fractional parts
+            const value = this.value - this.stepValue;
+            if(this.stepValueLog >= 0){
+                this.value = value;
+            }else{
+                this.value = (
+                    Math.round(value * this.stepValuePow10) /
+                    this.stepValuePow10
+                );
+            }
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.titleElement, style && style.title);
+            styleElement(this.unitElement, style && style.unit);
+            styleElement(this.stepUpElement, style && style.stepUp);
+            styleElement(this.stepDownElement, style && style.stepDown);
+            styleElement(this.inputElement, style && style.input);
+            styleElement(this.bodyElement, style && style.body);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            // Handle initial value state
+            this.minValue = options.min;
+            this.maxValue = options.max;
+            // Add elements
+            this.titleElement = createElement({
+                tag: "div",
+                class: "uxSpinnerTitle",
+            });
+            this.unitElement = createElement({
+                tag: "div",
+                class: "uxSpinnerUnit",
+            });
+            this.stepUpElement = createElement({
+                tag: "div",
+                class: "uxSpinnerStepUp",
+                onleftclick: event => {
+                    this.stepUp();
+                },
+            });
+            this.stepDownElement = createElement({
+                tag: "div",
+                class: "uxSpinnerStepDown",
+                onleftclick: event => {
+                    this.stepDown();
+                },
+            });
+            this.inputElement = createElement({
+                tag: "input",
+                type: "text",
+                value: options.value || this.minValue || 0,
+                class: "uxSpinnerInput",
+                onkeydown: event => {
+                    if(event.ctrlKey){
+                        return true;
+                    }
+                    if(event.key === "ArrowUp"){
+                        this.stepUp();
+                        return false;
+                    }else if(event.key === "ArrowDown"){
+                        this.stepDown();
+                        return false;
+                    }
+                    return ((event.key === "+" || event.key === "-") &&
+                        this.inputElement.selectionStart === 0 &&
+                        this.inputElement.value.indexOf("+") < 0 &&
+                        this.inputElement.value.indexOf("-") < 0
+                    ) || (
+                        event.key === "." &&
+                        this.inputElement.value.indexOf(".") < 0
+                    ) || (
+                        event.key === "Backspace" ||
+                        event.key === "ArrowLeft" ||
+                        event.key === "ArrowRight" ||
+                        event.key === "0" || event.key === "1" ||
+                        event.key === "2" || event.key === "3" ||
+                        event.key === "4" || event.key === "5" ||
+                        event.key === "6" || event.key === "7" ||
+                        event.key === "8" || event.key === "9"
+                    );
+                },
+                onchange: event => {
+                    // Incidentally enforces min/max value bounds
+                    this.value = this.value;
+                },
+            });
+            this.bodyElement = createElement({
+                tag: "div",
+                class: "uxSpinnerBody",
+                children: [
+                    this.inputElement,
+                    this.unitElement,
+                    this.stepUpElement,
+                    this.stepDownElement,
+                ],
+            });
+            window.addEventListener("mouseup", event => {
+                this.draggingCursor = false;
+            });
+            window.addEventListener("mousemove", event => {
+                if(this.draggingCursor){
+                    this.updateCursorValue(event);
+                    this.updateCursorPosition();
+                }
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxSpinner",
+                children: [this.titleElement, this.bodyElement],
+            });
+            // Set some attributes
+            this.title = options.title;
+            this.unit = options.unit;
+            this.step = options.step || 1;
+            // Set style, then all done!
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

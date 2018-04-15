@@ -1,0 +1,264 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+<link rel="import" href="mouse.html">
+
+<script>
+    
+    class UxPanel extends UxContainerElement{
+        static css(theme){
+            const headerHeight = theme.lineHeight + 4;
+            return `
+            .uxPanel {
+                position: absolute;
+                left: 0;
+                top: 0;
+                display: block;
+                box-sizing: border-box;
+                border-style: solid;
+                border-width: 2px;
+                border-color: ${theme.middleground};
+                border-radius: 2px;
+                background-color: ${theme.background};
+                color: ${theme.foreground};
+                font-family: ${theme.fontFamily};
+                font-size: ${theme.fontSize}px;
+            }
+            .uxPanelHeader {
+                display: block;
+                height: ${headerHeight}px;
+                line-height: ${headerHeight}px;
+                padding-left: 12px;
+                background-color: ${theme.middleground};
+            }
+            .uxPanelDraggable > .uxPanelHeader {
+                cursor: pointer;
+            }
+            .uxPanelTitle {
+                display: inline-block;
+            }
+            .uxPanelCollapseIcon {
+                display: none;
+                float: right;
+                width: ${headerHeight}px;
+                height: ${headerHeight}px;
+            }
+            .uxPanelCollapseIcon:hover {
+                background-color: ${theme.middlegroundLight};
+            }
+            .uxPanelCollapseIcon:active {
+                background-color: ${theme.middleground};
+            }
+            .uxPanelCollapseIcon:after {
+                content: "▼";
+                display: block;
+                width: ${headerHeight}px;
+                line-height: ${headerHeight}px;
+                font-size: ${headerHeight / 2}px;
+                text-align: center;
+            }
+            .uxPanelCollapsible > .uxPanelHeader > .uxPanelCollapseIcon {
+                display: block;
+            }
+            .uxPanelHideIcon {
+                display: none;
+                float: right;
+                width: ${headerHeight}px;
+                height: ${headerHeight}px;
+            }
+            .uxPanelHideIcon:hover {
+                background-color: ${theme.middlegroundLight};
+            }
+            .uxPanelHideIcon:active {
+                background-color: ${theme.middleground};
+            }
+            .uxPanelHideIcon:after {
+                content: "✖";
+                display: block;
+                width: ${headerHeight}px;
+                line-height: ${headerHeight}px;
+                font-size: ${headerHeight / 2 - 1}px;
+                text-align: center;
+            }
+            .uxPanelHideable > .uxPanelHeader > .uxPanelHideIcon {
+                display: block;
+            }
+            .uxPanelContent {
+                display: block;
+                position: relative;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .uxPanelCollapsed > .uxPanelContent {
+                display: none;
+            }
+            `;
+        }
+        get childContainerElement(){
+            return this.contentElement;
+        }
+        get title(){
+            return this.titleElement.innerText;
+        }
+        set title(title){
+            this.titleElement.innerText = title;
+        }
+        get draggable(){
+            return this.rootElement.classList.contains("uxPanelDraggable");
+        }
+        set draggable(value){
+            updateClass("uxPanelDraggable", value, this.rootElement);
+        }
+        get collapsible(){
+            return this.rootElement.classList.contains("uxPanelCollapsible");
+        }
+        set collapsible(collapsible){
+            updateClass("uxPanelCollapsible", collapsible, this.rootElement);
+        }
+        get collapsed(){
+            return this.rootElement.classList.contains("uxPanelCollapsed");
+        }
+        set collapsed(collapsed){
+            updateClass("uxPanelCollapsed", collapsed, this.rootElement);
+        }
+        get hideable(){
+            return this.rootElement.classList.contains("uxPanelHideable");
+        }
+        set hideable(value){
+            updateClass("uxPanelHideable", value, this.rootElement);
+        }
+        frontAndCenter(){
+            this.show();
+            this.center();
+            this.bringToFront(false);
+        }
+        center(){
+            if(this.rootElement.clientWidth){
+                this.rootElement.style.left = 0.5 * (
+                    this.rootElement.parentElement.clientWidth -
+                    this.rootElement.offsetWidth
+                );
+                this.rootElement.style.top = 0.5 * (
+                    this.rootElement.parentElement.clientHeight -
+                    this.rootElement.offsetHeight
+                );
+            }else{
+                requestAnimationFrame(() => this.center());
+            }
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.titleElement, style && style.title);
+            styleElement(this.headerElement, style && style.header);
+            styleElement(this.contentElement, style && style.content);
+            styleElement(this.hideButtonElement, style && style.hideIcon);
+            styleElement(this.collapseButtonElement, style && style.collapseIcon);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.id = options.id;
+            // Add essential elements
+            this.titleElement = createElement({
+                tag: "div",
+                class: "uxPanelTitle",
+            });
+            this.hideButtonElement = createElement({
+                tag: "div",
+                class: "uxPanelHideIcon",
+                onleftclick: event => {
+                    this.hide();
+                },
+            });
+            this.collapseButtonElement = createElement({
+                tag: "div",
+                class: "uxPanelCollapseIcon",
+                onleftclick: event => {
+                    toggleClass("uxPanelCollapsed", this.rootElement);
+                },
+            });
+            this.headerElement = createElement({
+                tag: "div",
+                class: "uxPanelHeader",
+                children: [
+                    this.titleElement,
+                    this.hideButtonElement,
+                    this.collapseButtonElement,
+                ],
+            });
+            this.contentElement = createElement({
+                tag: "div",
+                class: "uxPanelContent",
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxPanel",
+                children: [
+                    this.headerElement,
+                    this.contentElement,
+                ],
+                onmousedown: event => {
+                    if(this.draggable){
+                        this.bringToFront(true);
+                    }
+                }
+            });
+            // Add dragging functionality
+            this.dragOffsetX = undefined;
+            this.dragOffsetY = undefined;
+            this.dragTimeout = undefined;
+            this.dragCallback = () => {
+                this.rootElement.style.left = Math.min(
+                    window.innerWidth - this.rootElement.offsetWidth,
+                    Math.max(0, UxMouse.mouseX - this.dragOffsetX)
+                );
+                this.rootElement.style.top = Math.min(
+                    window.innerHeight - this.headerElement.offsetHeight,
+                    Math.max(0, UxMouse.mouseY - this.dragOffsetY)
+                );
+                if(this.dragTimeout){
+                    this.dragTimeout = setTimeout(
+                        this.dragCallback, 10
+                    );
+                }
+            }
+            this.headerElement.addEventListener("mousedown", event => {
+                if(this.draggable && event.button === 0 && !event.ctrlKey &&
+                    event.path[0] !== this.collapseButtonElement &&
+                    event.path[0] !== this.hideButtonElement
+                ){
+                    // Note to self: Using clientX/clientY and ClientRect is
+                    // correct here! Don't absentmindedly change them to page
+                    // coordinates.
+                    const panelRect = this.rootElement.getBoundingClientRect();
+                    this.dragOffsetX = event.clientX - panelRect.left;
+                    this.dragOffsetY = event.clientY - panelRect.top;
+                    this.dragTimeout = setTimeout(
+                        this.dragCallback, 10
+                    );
+                }
+            });
+            window.addEventListener("mouseup", event => {
+                if(this.dragTimeout){
+                    clearTimeout(this.dragTimeout);
+                    this.dragTimeout = undefined;
+                }
+            });
+            // Handle behavior flags
+            this.draggable = options.draggable;
+            this.collapsible = options.collapsible;
+            this.hideable = options.hideable;
+            // More state
+            this.title = options.title;
+            this.collapsed = options.collapsed;
+            // Handle "centered" convenience flag
+            if(options.centered){
+                this.center();
+            }
+            // Set style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

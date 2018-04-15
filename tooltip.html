@@ -1,0 +1,101 @@
+<link rel="import" href="helpers.html">
+<link rel="import" href="mouse.html">
+
+<script>
+    
+    // Add a tooltip to a DOM element by calling
+    // `tooltip = new UxTooltip(element, tooltipText);`
+    // You can get and set the tooltip text with `tooltip.text`.
+    // You can remove the tooltip entirely with `tooltip.remove()`.
+    class UxTooltip{
+        static css(theme){
+            return `
+            .uxTooltip {
+                position: absolute;
+                background-color: ${theme.background};
+                color: ${theme.foreground};
+                font-family: ${theme.fontFamily};
+                font-size: ${theme.smallFontSize}px;
+                line-height: ${theme.smallFontSize * 1.25}px;
+                padding: 6px;
+                max-width: 200px;
+                border-style: solid;
+                border-width: 1px;
+                border-color: ${theme.middleground};
+                border-radius: 2px;
+                margin-top: 22px;
+                z-index: 200;
+            }
+            `;
+        }
+        static getTooltipElement(){
+            if(!UxTooltip.tooltipElement){
+                UxTooltip.tooltipElement = createElement({
+                    tag: "div",
+                    class: "uxTooltip",
+                    style: {display: "none"},
+                });
+                document.body.appendChild(UxTooltip.tooltipElement);
+                window.addEventListener("click", event => {
+                    UxTooltip.tooltipElement.style.display = "none";
+                });
+            }
+            return UxTooltip.tooltipElement;
+        }
+        static clearTooltipTimeout(){
+            if(UxTooltip.tooltipTimeout){
+                clearTimeout(UxTooltip.tooltipTimeout);
+                UxTooltip.tooltipTimeout = undefined;
+            }
+        }
+        get text(){
+            return this.tooltipText;
+        }
+        set text(text){
+            this.tooltipText = text;
+            if(UxTooltip.activeTooltip === this){
+                UxTooltip.tooltipElement.innerText = text;
+            }
+        }
+        remove(){
+            if(this.element){
+                this.element.removeEventListener("mouseenter",
+                    this.mouseEnterListener
+                );
+                this.element.removeEventListener("mouseleave",
+                    this.mouseLeaveListener
+                );
+            }
+            if(UxTooltip.activeTooltip === this){
+                UxTooltip.tooltipElement.style.display = "none";
+            }
+        }
+        constructor(element, text){
+            this.tooltipText = text;
+            this.element = element;
+            this.mouseEnterListener = event => {
+                UxTooltip.clearTooltipTimeout();
+                UxTooltip.tooltipTimeout = setTimeout(() => {
+                    const tooltipElement = UxTooltip.getTooltipElement();
+                    tooltipElement.innerText = this.text;
+                    tooltipElement.style.display = "block";
+                    tooltipElement.style.left = UxMouse.mouseX;
+                    tooltipElement.style.top = UxMouse.mouseY;
+                    UxTooltip.activeTooltip = this;
+                    UxTooltip.tooltipTimeout = undefined;
+                }, 1000);
+            };
+            this.mouseLeaveListener = event => {
+                UxTooltip.clearTooltipTimeout();
+                UxTooltip.getTooltipElement().style.display = "none";
+            };
+            this.element.addEventListener("mouseenter",
+                this.mouseEnterListener
+            );
+            this.element.addEventListener("mouseleave",
+                this.mouseLeaveListener
+            );
+        }
+    }
+    
+</script>

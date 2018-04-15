@@ -1,0 +1,94 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<link rel="import" href="button.html">
+
+<script>
+
+    class UxEditField extends UxElement{
+        static css(theme){
+            return `
+            .uxEditField {
+                display: block;
+                position: relative;
+                height: ${theme.lineHeight}px;
+                line-height: ${theme.lineHeight}px;
+                margin: ${theme.elementMargin};
+            }
+            .uxEditFieldTitle {
+                float: left;
+            }
+            .uxEditFieldValue {
+                float: right;
+            }
+            .uxEditField > .uxButton {
+                position: relative;
+                float: right;
+                margin: 0;
+                margin-left: ${(theme.lineHeight - 6) / 2}px;
+                width: ${theme.lineHeight}px;
+                height: ${theme.lineHeight}px;
+                line-height: ${theme.lineHeight}px;
+            }
+            .uxEditField > .uxButton:after {
+                content: "⇗";
+                font-size: ${theme.lineHeight - 6}px;
+                width: ${theme.lineHeight}px;
+                text-align: center;
+                position: absolute;
+                left: -1px;
+                top: -1px;
+            }
+            `;
+        }
+        get value(){
+            return this.currentValue;
+        }
+        set value(value){
+            this.currentValue = value;
+            this.valueElement.innerText = value;
+        }
+        get title(){
+            return this.titleElement.innerText;
+        }
+        set title(title){
+            this.titleElement.innerText = title;
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.titleElement, style && style.title);
+            styleElement(this.valueElement, style && style.value);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.currentValue = options.value;
+            this.titleElement = createElement({
+                tag: "div",
+                class: "uxEditFieldTitle",
+                content: options.title || "[Untitled edit field]",
+            });
+            this.valueElement = createElement({
+                tag: "div",
+                class: "uxEditFieldValue",
+                content: options.value,
+            });
+            this.buttonElement = new UxButton({
+                onleftclick: this.getEventHandler("edit"),
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxEditField",
+                children: [
+                    this.titleElement,
+                    this.buttonElement.element,
+                    this.valueElement,
+                ],
+            });
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

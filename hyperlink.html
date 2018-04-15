@@ -1,0 +1,59 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<script>
+
+    class UxHyperlink extends UxElement{
+        static css(theme){
+            return `
+            .uxHyperlink {
+                display: block;
+                margin: ${theme.elementMargin};
+                text-decoration: underline;
+                color: ${theme.foreground};
+                cursor: pointer;
+            }
+            .uxHyperlink:hover {
+                text-decoration: underline;
+                color: ${theme.accent};
+            }
+            `
+        }
+        get title(){
+            return this.rootElement.innerText;
+        }
+        set title(title){
+            this.rootElement.innerText = title;
+        }
+        get url(){
+            return this.rootElement.href;
+        }
+        set url(url){
+            this.rootElement.href = url;
+        }
+        center(){
+            this.rootElement.style.textAlign = "center";
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.rootElement = createElement({
+                tag: "a",
+                href: options.url,
+                target: "_blank",
+                content: options.title || options.url,
+                class: "uxHyperlink",
+            });
+            if(options.centered){
+                this.center();
+            }
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

@@ -1,0 +1,184 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<link rel="import" href="scroll-list.html">
+<link rel="import" href="search-input.html">
+
+<script>
+    
+    class UxSearchList extends UxContainerElement{
+        static css(theme){
+            return `
+            .uxSearchList {
+                position: relative;
+                box-sizing: border-box;
+                border-radius: 2px;
+                border-style: solid;
+                border-width: 1px;
+                border-color: ${theme.middleground};
+                margin: ${theme.elementMargin};
+            }
+            .uxSearchList > .uxSearchInput {
+                margin: 0;
+            }
+            .uxSearchList > .uxSearchInput > .uxTextFieldInput {
+                border-radius: 0;
+            }
+            .uxSearchList > .uxScrollList {
+                position: absolute;
+                top: 26px;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                border-width: 0;
+                border-radius: 0;
+                margin: 0;
+            }
+            `;
+        }
+        get element(){
+            return this.rootElement;
+        }
+        get children(){
+            return this.listElement.children;
+        }
+        get childContainerElement(){
+            return this.listElement.childContainerElement;
+        }
+        // UxScrollList
+        get value(){
+            return this.listElement.value;
+        }
+        set value(value){
+            this.listElement.value = value;
+        }
+        filter(filterFunction){
+            return this.listElement.filter(filterFunction);
+        }
+        sort(orderFunction){
+            return this.listElement.sort(orderFunction);
+        }
+        search(searchString){
+            return this.listElement.search(searchString);
+        }
+        get activeItem(){
+            return this.listElement.activeItem;
+        }
+        set activeItem(itemElement){
+            this.listElement.activeItem = itemElement;
+        }
+        moveActiveCursorUp(steps = 1){
+            return this.listElement.moveActiveCursorUp(steps);
+        }
+        moveActiveCursorDown(steps = 1){
+            return this.listElement.moveActiveCursorDown(steps);
+        }
+        moveActiveCursorToTop(){
+            return this.listElement.moveActiveCursorToTop();
+        }
+        moveActiveCursorToBottom(){
+            return this.listElement.moveActiveCursorToBottom();
+        }
+        handleActiveCursorKeyEvent(event){
+            return this.listElement.handleActiveCursorKeyEvent(event);
+        }
+        select(itemElement){
+            return this.listElement.select(itemElement);
+        }
+        selectActiveItem(){
+            return this.listElement.selectActiveItem();
+        }
+        get scroll(){
+            return this.listElement.scroll;
+        }
+        set scroll(value){
+            this.listElement.scroll = scroll;
+        }
+        get scrollHeight(){
+            return this.listElement.scrollHeight;
+        }
+        scrollTo(element){
+            return this.listElement.scrollTo(element);
+        }
+        addItem(options){
+            this.listElement.addItem(options);
+            return this;
+        }
+        addOne(child){
+            this.listElement.addOne(child);
+            return this;
+        }
+        remove(child){
+            this.listElement.remove(child);
+            return this;
+        }
+        // UxSearchInput
+        get searchString(){
+            return this.searchInputElement.value;
+        }
+        set searchString(searchString){
+            this.searchInputElement.value = searchString;
+        }
+        get placeholder(){
+            return this.searchInputElement.placeholder;
+        }
+        set placeholder(placeholder){
+            this.searchInputElement.placeholder = placeholder;
+        }
+        focus(){
+            return this.searchInputElement.focus();
+        }
+        // UxSearchList
+        setStyle(style){
+            // TODO: more sensible styling
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.listElement = new UxScrollList();
+            this.searchInputElement = new UxSearchInput({
+                oninput: event => {
+                    this.listElement.search(this.searchString);
+                },
+                onkeydown: event => {
+                    if(event.key === "ArrowUp" || event.key === "ArrowDown"){
+                        this.handleActiveCursorKeyEvent(event);
+                        return false;
+                    }else if(event.key === "Enter"){
+                        // If exactly one item is visible and it
+                        // isn't already selected, select it now
+                        if(!this.activeItem){
+                            const visible = this.getVisibleChildren();
+                            if(visible.length === 1){
+                                this.activeItem = visible[0];
+                            }
+                        }
+                        if(this.activeItem){
+                            this.select(this.activeItem);
+                        }
+                        return false;
+                    }
+                },
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxSearchList",
+                children: [
+                    this.listElement.element,
+                    this.searchInputElement.element,
+                ],
+            });
+            // Add initial list items
+            this.addItems(options.items);
+            // Set value and state
+            this.value = options.value;
+            this.placeholder = options.placeholder || "Search in list...";
+            // Set style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

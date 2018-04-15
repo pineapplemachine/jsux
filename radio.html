@@ -1,0 +1,138 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+<link rel="import" href="tooltip.html">
+
+<script>
+
+    class UxRadio extends UxElement{
+        static css(theme){
+            const radioHeight = theme.fontSize + 4;
+            return `
+            .uxRadio {
+                display: block;
+                position: relative;
+                height: ${radioHeight}px;
+                line-height: ${radioHeight}px;
+                margin: ${theme.elementMargin};
+                cursor: pointer;
+            }
+            .uxRadio:hover > .uxRadioIcon {
+                border-color: ${theme.foreground};
+            }
+            .uxRadio:active > .uxRadioIcon {
+                border-color: ${theme.foreground};
+            }
+            .uxRadio input:checked ~ .uxRadioIcon {
+                background-color: ${theme.accent};
+                background: radial-gradient(
+                    ${theme.foregroundLight}, ${theme.foregroundLight},
+                    ${theme.foregroundLight}, ${theme.foregroundLight},
+                    ${theme.accent}, ${theme.accent},
+                    ${theme.accent}, ${theme.accent}
+                );
+            }
+            .uxRadioInput {
+                display: inline;
+                vertical-align: middle;
+                width: 0;
+                margin: 0;
+                opacity: 0;
+            }
+            .uxRadioIcon {
+                display: inline-block;
+                vertical-align: middle;
+                width: ${radioHeight}px;
+                height: ${radioHeight}px;
+                background-color: ${theme.middleground};
+                box-sizing: border-box;
+                border-radius: ${radioHeight / 2}px;
+                border-style: solid;
+                border-width: 1px;
+                border-color: transparent;
+            }
+            .uxRadioTitle {
+                display: inline;
+                vertical-align: middle;
+                margin-left: ${radioHeight / 2}px;
+            }
+            `;
+        }
+        get tooltipTargetElement(){
+            return this.titleElement;
+        }
+        get value(){
+            return this.inputElement.checked;
+        }
+        set value(checked){
+            if(!checked !== !this.inputElement.checked){
+                this.inputElement.checked = checked;
+                if(this.onchange){
+                    this.onchange(checked);
+                }
+            }
+        }
+        get group(){
+            return this.inputElement.name;
+        }
+        set group(group){
+            this.inputElement.name = group;
+        }
+        get title(){
+            return this.titleElement.innerText;
+        }
+        set title(title){
+            this.titleElement.innerText = title;
+        }
+        toggle(){
+            this.inputElement.checked = !this.inputElement.checked;
+            if(this.onchange){
+                this.onchange(this.inputElement.checked);
+            }
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            styleElement(this.iconElement, style && style.icon);
+            styleElement(this.titleElement, style && style.title);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.onchange = options.onchange;
+            this.inputElement = createElement({
+                tag: "input",
+                type: "radio",
+                name: options.group || "unspecifiedRadioGroup",
+                checked: options.checked || false,
+                class: "uxRadioInput",
+            });
+            this.iconElement = createElement({
+                tag: "div",
+                class: "uxRadioIcon",
+            });
+            this.titleElement = createElement({
+                tag: "div",
+                content: options.title || "[Untitled radio button]",
+                class: "uxRadioTitle",
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxRadio",
+                children: [
+                    this.inputElement,
+                    this.iconElement,
+                    this.titleElement,
+                ],
+                onleftclick: event => {
+                    if(event.path[0] !== this.inputElement){
+                        this.toggle();
+                    }
+                },
+            });
+            // Set style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

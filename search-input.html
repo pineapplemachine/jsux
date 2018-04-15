@@ -1,0 +1,77 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+<link rel="import" href="tooltip.html">
+
+<link rel="import" href="text-field.html">
+
+<script>
+
+    class UxSearchInput extends UxElement{
+        static css(theme){
+            return `
+            .uxSearchInput:after {
+                content: "⌕";
+                color: ${theme.foregroundDark};
+                width: auto;
+                height: 26px;
+                line-height: 26px;
+                font-size: 24px;
+                position: absolute;
+                top: -2px;
+                right: 5px;
+            }
+            `;
+        }
+        get element(){
+            return this.textFieldElement.element;
+        }
+        // UxTextField
+        get value(){
+            return this.textFieldElement.value;
+        }
+        set value(value){
+            this.textFieldElement.value = value;
+        }
+        get title(){
+            return this.textFieldElement.title;
+        }
+        set title(title){
+            this.textFieldElement.title = title;
+        }
+        get placeholder(){
+            return this.textFieldElement.placeholder;
+        }
+        set placeholder(placeholder){
+            this.textFieldElement.placeholder = placeholder;
+        }
+        focus(){
+            return this.textFieldElement.focus();
+        }
+        handleEvent(eventName, eventObject){
+            return this.textFieldElement.handleEvent(eventName, eventObject);
+        }
+        addEventListener(...args){
+            return this.textFieldElement.addEventListener(...args);
+        }
+        removeEventListener(...args){
+            return this.textFieldElement.removeEventListener(...args);
+        }
+        // UxSearchInput
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.textFieldElement = new UxTextField();
+            this.textFieldElement.element.classList.add("uxSearchInput");
+            this.title = options.title;
+            this.placeholder = options.placeholder || "Search...";
+            this.value = options.value || "";
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>
