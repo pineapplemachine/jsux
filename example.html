@@ -25,6 +25,7 @@
             <link rel="import" href="section.html">
             <link rel="import" href="slider.html">
             <link rel="import" href="spinner.html">
+            <link rel="import" href="table.html">
             <link rel="import" href="tabs.html">
             <link rel="import" href="text.html">
             <link rel="import" href="text-area.html">
@@ -358,6 +359,24 @@
                     }),
                 ]);
                 
+                const tablesTab = new UxTab({
+                    title: "Tables",
+                }).add([
+                    new UxTable({
+                        id: "someTable",
+                        headers: [
+                            "first", "second", "third",
+                        ],
+                        rows: [
+                            {first: "hello", second: 100, third: 16},
+                            {first: "world", second: 5, third: 18},
+                            {first: "what's", second: 5000, third: 20},
+                            {first: "going", second: 900, third: 22},
+                            {first: "on", second: 11, third: 24},
+                        ],
+                    }),
+                ]);
+                
                 const panel = new UxPanel({
                     title: "Example panel",
                     hideable: true,
@@ -373,6 +392,7 @@
                         slidersTab,
                         textTab,
                         listsTab,
+                        tablesTab,
                     ]),
                 ]);
                 

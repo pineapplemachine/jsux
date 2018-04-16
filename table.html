@@ -1,0 +1,361 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<script>
+    
+    class UxTableRow extends UxElement{
+        get childContainerElement(){
+            return this.rootElement;
+        }
+        get value(){
+            return this.valueProxy;
+        }
+        set value(value){
+            if(value instanceof Array){
+                this.valueObject = {};
+                const headers = this.parent && this.parent.headers;
+                if(headers){
+                    for(let i = 0; i < this.cells.length; i++){
+                        this.cells[i].innerText = value[i];
+                        this.valueObject[headers[i].value] = value[i];
+                    }
+                }
+            }else if(value){
+                this.valueObject = {};
+                const headers = this.parent && this.parent.headers;
+                if(headers){
+                    for(let i = 0; i < this.cells.length; i++){
+                        const headerName = headers[i].value;
+                        this.cells[i].innerText = value[headerName];
+                        this.valueObject[headerName] = value[headerName];
+                    }
+                }
+            }else{
+                this.valueObject = {};
+                for(let i = 0; i < this.cells.length; i++){
+                    this.cells[i].innerText = "";
+                }
+            }
+        }
+        get cells(){
+            return this.rootElement.children;
+        }
+        updateCells(){
+            const headers = this.parent && this.parent.headers;
+            if(!headers){
+                return;
+            }
+            while(headers.length > this.cells.length){
+                this.addCell();
+            }
+            for(let i = 0; i < this.cells.length; i++){
+                this.cellsByName[headers[i].value] = this.cells[i];
+                this.cells[i].innerText = (
+                    this.valueObject[headers[i].value]
+                );
+            }
+        }
+        addCell(){
+            const column = createElement({
+                tag: "div",
+                class: "uxTableCell",
+            });
+            this.rootElement.appendChild(column);
+            return column;
+        }
+        getValueByName(name){
+            return this.valueObject[name];
+        }
+        setValueByName(name, value){
+            this.valueObject[name] = value;
+            this.cellsByName[name].innerText = value;
+        }
+        getValueAtIndex(index){
+            const header = this.parent && this.parent.headers[index];
+            return header && this.valueObject[header.value];
+        }
+        setValueAtIndex(index, value){
+            this.cells[index].innerText = value;
+            const header = this.parent && this.parent.headers[index];
+            if(header){
+                this.valueObject[header.value] = value;
+            }
+        }
+        constructor(options = {}){
+            super(options);
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxTableRow",
+            });
+            this.cellsByName = {};
+            this.valueObject = options || {};
+            this.valueProxy = new Proxy({}, {
+                get: (object, attribute) => {
+                    const index = parseInt(attribute);
+                    if(index === index){
+                        return this.getValueAtIndex(index);
+                    }else{
+                        return this.getValueByName(attribute);
+                    }
+                },
+                set: (object, attribute, value) => {
+                    const index = parseInt(attribute);
+                    if(index === index){
+                        return this.setValueAtIndex(index, value);
+                    }else{
+                        return this.setValueByName(attribute, value);
+                    }
+                },
+            });
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+    class UxTableHeader extends UxElement{
+        get title(){
+            return this.rootElement.innerText;
+        }
+        set title(title){
+            this.rootElement.innerText = title;
+        }
+        get value(){
+            return this.columnValue;
+        }
+        set value(value){
+            if(this.parent && this.parent.headersByName){
+                delete this.parent.headersByName[this.columnValue];
+                this.parent.headersByName[value] = this;
+            }
+            this.columnValue = value;
+        }
+        remove(){
+            return this.parent && this.parent.removeHeader(this);
+        }
+        constructor(options = {}){
+            if(typeof(options) === "string"){
+                options = {title: options};
+            }
+            super(options);
+            this.options = options;
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxTableHeader",
+                content: options.title,
+                onclick: this.getEventHandler("click"),
+            });
+            this.sort = options.sort;
+            this.value = options.value || options.title;
+            this.lastSortAscending = false;
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+
+    class UxTable extends UxContainerElement{
+        static css(theme){
+            return `
+            .uxTable {
+                display: block;
+                margin: ${theme.elementMargin};
+                border-radius: 2px;
+                box-sizing: border-box;
+                border-style: solid;
+                border-width: 1px;
+                border-color: ${theme.middleground};
+                overflow: hidden;
+            }
+            .uxTableContent {
+                display: table;
+                width: 100%;
+                line-height: ${theme.lineHeight}px;
+                font-size: ${theme.smallFontSize}px;
+            }
+            .uxTableHeaders {
+                display: table-row;
+                width: 100%;
+                height: ${theme.lineHeight}px;
+                background-color: ${theme.middleground};
+            }
+            .uxTableHeader {
+                display: table-cell;
+                position: relative;
+                padding: 0 6px;
+                cursor: pointer;
+            }
+            .uxTableHeader:hover:after, .uxTableHeader:active:after {
+                content: "▼";
+                display: block;
+                position: absolute;
+                top: 0;
+                right: 6px;
+                line-height: ${theme.lineHeight}px;
+                font-size: ${theme.smallFontSize - 2}px;
+            }
+            .uxTableHeader:active {
+                background-color: ${theme.middlegroundDark};
+            }
+            .uxTableRow {
+                display: table-row;
+                width: 100%;
+                height: ${theme.lineHeight}px;
+            }
+            .uxTableCell {
+                display: table-cell;
+                padding: 0 6px;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                box-sizing: border-box;
+                border-style: solid;
+                border-width: 0;
+                border-right-width: 1px;
+                border-bottom-width: 1px;
+                border-color: ${theme.middlegroundDark};
+            }
+            .uxTableCell:last-child {
+                border-right-width: 0;
+            }
+            .uxTableRow:last-child > .uxTableCell {
+                border-bottom-width: 0;
+            }
+            `;
+        }
+        get childContainerElement(){
+            return this.contentElement;
+        }
+        set headers(optionsList){
+            this.removeAllHeaders();
+            if(optionsList){
+                for(let options of optionsList){
+                    this.addHeader(options, false);
+                }
+            }
+            this.updateRows();
+        }
+        get headers(){
+            return this.headerList;
+        }
+        addHeader(options, updateRows = true){
+            const headerElement = (options && options instanceof UxTableHeader ?
+                options : new UxTableHeader(options)
+            );
+            this.inElementTree(headerElement);
+            headerElement.parent = this;
+            headerElement.addEventListener("leftclick", event => {
+                if(headerElement === this.lastSortedHeader){
+                    this.sortBy(headerElement, false);
+                    this.lastSortedHeader = undefined;
+                }else{
+                    this.sortBy(headerElement, true);
+                    this.lastSortedHeader = headerElement;
+                }
+            });
+            this.headerElement.appendChild(headerElement.element);
+            this.headerList.push(headerElement);
+            this.headersByName[headerElement.value] = headerElement;
+            if(updateRows){
+                this.updateRows();
+            }
+            return headerElement;
+        }
+        removeHeader(header){
+            const index = this.headerList && this.headerList.indexOf(header);
+            if(index >= 0){
+                this.headerElement.removeChild(header.element);
+                this.headerList.splice(index, 1);
+                delete this.headersByName[header.value];
+                this.updateRows();
+            }
+        }
+        removeAllHeaders(){
+            if(this.headerList && this.headerList.length){
+                removeChildren(this.headerElement);
+                this.headerList = [];
+                this.headersByName = {};
+                this.updateRows();
+            }
+        }
+        sortBy(header, ascending = true){
+            if(typeof(header) === "string"){
+                header = this.getHeaderByTitle(header);
+            }
+            let indexInParent = 0;
+            for(let element of this.children){
+                element.indexInParent = indexInParent++;
+            }
+            const ascendingComparator = (a, b) => {
+                const aValue = a.value[header.value];
+                const bValue = b.value[header.value];
+                if(aValue < bValue) return -1;
+                if(aValue > bValue) return +1;
+                if(a.indexInParent < b.indexInParent) return -1;
+                if(a.indexInParent > b.indexInParent) return +1;
+                return 0;
+            };
+            const comparator = (ascending ?
+                ascendingComparator : (a, b) => ascendingComparator(b, a)
+            );
+            Array.prototype.sort.call(
+                this.children, comparator
+            ).forEach(element => {
+                this.childContainerElement.appendChild(element.element);
+            });
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.headerElement = createElement({
+                tag: "div",
+                class: "uxTableHeaders",
+            });
+            this.contentElement = createElement({
+                tag: "div",
+                class: "uxTableContent",
+                children: [
+                    this.headerElement,
+                ],
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxTable",
+                children: [
+                    this.contentElement,
+                ],
+            });
+            this.headerList = [];
+            this.headersByName = {};
+            this.headers = options.headers || [];
+            this.addRows(options.rows);
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+        get rows(){
+            return this.children;
+        }
+        updateRows(){
+            for(let row of this.children){
+                row.updateCells();
+            }
+        }
+        addRow(options = {}){
+            const row = new UxTableRow(options);
+            this.addOne(row);
+            return row;
+        }
+        addRows(optionsList){
+            if(optionsList){
+                for(let options of optionsList){
+                    this.addRow(options);
+                }
+            }
+        }
+        addOne(child){
+            super.addOne(child);
+            if(child.updateCells){
+                child.updateCells();
+            }
+        }
+    }
+    
+</script>
