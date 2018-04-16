@@ -1,0 +1,65 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<script>
+    
+    class UxColumn extends UxContainerElement{
+        static css(theme){
+            return `
+            .uxColumn {
+                box-sizing: border-box;
+                display: inline-block;
+                margin: 0;
+            }
+            `;
+        }
+        get childContainerElement(){
+            return this.rootElement;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxColumn",
+            });
+            this.setStyle(options.style);
+        }
+    }
+
+    class UxColumns extends UxContainerElement{
+        get childContainerElement(){
+            return this.rootElement;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxColumns",
+            });
+            this.setStyle(options.style);
+        }
+        updateColumnWidth(){
+            const width = `${100 / this.children.length}%`;
+            for(let i = 0; i < this.children.length; i++){
+                const column = this.children[i];
+                column.element.style.width = width;
+            }
+        }
+        column(options = {}){
+            const column = new UxColumn(options);
+            this.addOne(column);
+            return column;
+        }
+        addOne(child){
+            super.addOne(child);
+            this.updateColumnWidth();
+        }
+        remove(child){
+            super.remove(child);
+            this.updateColumnWidth();
+        }
+    }
+    
+</script>

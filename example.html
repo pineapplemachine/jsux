@@ -8,6 +8,7 @@
             <link rel="import" href="button.html">
             <link rel="import" href="checkbox.html">
             <link rel="import" href="color-picker.html">
+            <link rel="import" href="columns.html">
             <link rel="import" href="div.html">
             <link rel="import" href="drop-down.html">
             <link rel="import" href="edit-field.html">
@@ -226,6 +227,17 @@
                         id: "textArea",
                         placeholder: "This is a text area",
                     }),
+                    new UxColumns().add([
+                        new UxColumn().add(
+                            new UxText("Left column")
+                        ),
+                        new UxColumn().add(
+                            new UxText("Center column")
+                        ),
+                        new UxColumn().add(
+                            new UxText("Right column")
+                        ),
+                    ]),
                     new UxScrollSection({
                         title: "Srolling section with text",
                         style: {height: "150px"},
