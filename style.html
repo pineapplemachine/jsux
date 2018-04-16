@@ -1,0 +1,75 @@
+<script>
+    
+    // Helper for managing a single bunch of CSS
+    class UxStyle{
+        get element(){
+            return this.styleElement;
+        }
+        get css(){
+            return this.styleElement.innerText;
+        }
+        set css(css){
+            this.styleElement.innerText = css.replace(/\s*\n\s*/g, " ");;
+        }
+        apply(parent){
+            this.parent = parent || document.head;
+            this.parent.appendChild(this.styleElement);
+            return this;
+        }
+        remove(){
+            if(this.parent){
+                this.parent.removeChild(this.styleElement);
+                this.parent = undefined;
+            }
+        }
+        constructor(css, priority = 0){
+            this.parent = undefined;
+            this.styleElement = createElement({
+                tag: "style",
+                class: "uxStyle",
+                content: css || "",
+            });
+        }
+    }
+    
+    // Used to group related styles together
+    class UxStyleSet{
+        get element(){
+            return this.styleElement;
+        }
+        apply(parent){
+            this.parent = parent || document.head;
+            this.parent.appendChild(this.styleElement);
+            return this;
+        }
+        remove(){
+            if(this.parent){
+                this.parent.removeChild(this.styleElement);
+            }
+        }
+        constructor(styles){
+            this.parent = undefined;
+            this.styles = styles || [];
+            this.styleElement = createElement({
+                tag: "div",
+                class: "uxStyleSet",
+            });
+        }
+        addStyle(style){
+            if(!(style instanceof UxStyle)){
+                style = new UxStyle(style);
+            }
+            this.styles.push(style);
+            style.apply(this.styleElement);
+            return style;
+        }
+        removeStyle(style){
+            const index = this.styles.indexOf(style);
+            if(index >= 0){
+                this.styles.splice(index, 1);
+                style.remove();
+            }
+        }
+    }
+    
+</script>

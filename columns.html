@@ -4,15 +4,6 @@
 <script>
     
     class UxColumn extends UxContainerElement{
-        static css(theme){
-            return `
-            .uxColumn {
-                box-sizing: border-box;
-                display: inline-block;
-                margin: 0;
-            }
-            `;
-        }
         get childContainerElement(){
             return this.rootElement;
         }
@@ -29,6 +20,15 @@
     }
 
     class UxColumns extends UxContainerElement{
+        static css(theme){
+            return `
+            .uxColumn {
+                box-sizing: border-box;
+                display: inline-block;
+                margin: 0;
+            }
+            `;
+        }
         get childContainerElement(){
             return this.rootElement;
         }

@@ -4,35 +4,6 @@
 <script>
 
     class UxTab extends UxContainerElement{
-        static css(theme){
-            const headerHeight = theme.lineHeight + 4;
-            return `
-            .uxTabHeader {
-                display: inline-block;
-                height: ${headerHeight}px;
-                line-height: ${headerHeight}px;
-                background-color: ${theme.middlegroundDark};
-                box-sizing: border-box;
-                padding: 0 8px;
-                border-top-right-radius: 8px;
-                cursor: pointer;
-            }
-            .uxTabHeader:active {
-                background-color: ${theme.middleground};
-            }
-            .uxTabHeaderSelected {
-                background-color: ${theme.middleground};
-            }
-            .uxTabContent {
-                display: none;
-                width: 100%;
-                box-sizing: border-box;
-            }
-            .uxTabContentSelected {
-                display: block;
-            }
-            `;
-        }
         get tooltipTargetElement(){
             return this.headerElement;
         }
@@ -81,6 +52,7 @@
 
     class UxTabs extends UxContainerElement{
         static css(theme){
+            const headerHeight = theme.lineHeight + 4;
             return `
             .uxTabs {
                 display: block;
@@ -89,6 +61,22 @@
             }
             .uxTabsHeaderContainer {
                 overflow: hidden;
+            }
+            .uxTabHeader {
+                display: inline-block;
+                height: ${headerHeight}px;
+                line-height: ${headerHeight}px;
+                background-color: ${theme.middlegroundDark};
+                box-sizing: border-box;
+                padding: 0 8px;
+                border-top-right-radius: 8px;
+                cursor: pointer;
+            }
+            .uxTabHeader:active {
+                background-color: ${theme.middleground};
+            }
+            .uxTabHeaderSelected {
+                background-color: ${theme.middleground};
             }
             .uxTabsContentContainer {
                 display: block;
@@ -99,6 +87,14 @@
                 border-color: ${theme.middleground};
                 border-radius: 2px;
                 border-top-left-radius: 0;
+            }
+            .uxTabContent {
+                display: none;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .uxTabContentSelected {
+                display: block;
             }
             `;
         }

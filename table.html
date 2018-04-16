@@ -284,7 +284,7 @@
             for(let element of this.children){
                 element.indexInParent = indexInParent++;
             }
-            const ascendingComparator = header.comparator || (a, b) => {
+            const ascendingComparator = header.comparator || ((a, b) => {
                 const aValue = a.value[header.value];
                 const bValue = b.value[header.value];
                 if(aValue < bValue) return -1;
@@ -292,7 +292,7 @@
                 if(a.indexInParent < b.indexInParent) return -1;
                 if(a.indexInParent > b.indexInParent) return +1;
                 return 0;
-            };
+            });
             const comparator = (ascending ?
                 ascendingComparator : (a, b) => ascendingComparator(b, a)
             );

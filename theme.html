@@ -1,5 +1,6 @@
 <link rel="import" href="color.html">
 <link rel="import" href="element.html">
+<link rel="import" href="style.html">
 <link rel="import" href="tooltip.html">
 
 <script>
@@ -53,44 +54,29 @@
         set accent(color){
             this.accentColor = new UxColor(color);
         }
-        get extraCss(){
-            return this.styleElement && this.styleElement.innerText;
-        }
-        set extraCss(css){
-            if(css && !this.styleElement){
-                this.styleElement = createElement({
-                    tag: "style",
-                    content: typeof(css) === "string" ? css : css(this),
-                });
-                document.children[0].appendChild(this.styleElement);
-            }else if(this.styleElement){
-                this.styleElement.innerText = css;
-            }
-        }
         get elementMargin(){
             return (
                 `${this.elementHorizontalMargin}px ` +
                 `${this.elementVerticalMargin}px`
             );
         }
+        addExtraStyle(css){
+            return this.extraStyleSet.addStyle(
+                typeof(css) === "string" ? css : css(this)
+            );
+        }
         handleElementType(elementType){
-            if(elementType.css){
-                const css = elementType.css(this).replace(/\s+/g, " ");
-                if(this.styleElements[elementType.name]){
-                    this.styleElements[elementType.name].innerText = css;
-                }else{
-                    const styleElement = createElement({
-                        tag: "style",
-                        content: css,
-                    });
-                    this.styleElements[elementType.name] = styleElement;
-                    document.children[0].appendChild(styleElement);
-                }
-                // Theme-specific CSS should always be last so that it takes
-                // precedence over element-specific CSS
-                if(this.styleElement){
-                    document.children[0].appendChild(this.styleElement);
-                }
+            if(!elementType.css){
+                return;
+            }
+            const css = (typeof(elementType.css) === "string" ?
+                elementType.css : elementType.css(this)
+            );
+            const name = elementType.name;
+            if(this.elementStyles[name]){
+                this.elementStyles[name].css = css;
+            }else{
+                this.elementStyles[name] = this.elementStyleSet.addStyle(css);
             }
         }
         apply(){
@@ -131,10 +117,18 @@
             this.scrollBarWidth = options.scrollBarWidth || 8;
             this.elementHorizontalMargin = options.elementHorizontalMargin || 12;
             this.elementVerticalMargin = options.elementVerticalMargin || 8;
-            // Extra CSS
-            this.extraCss = options.extraCss;
             // Other stuff
-            this.styleElements = {};
+            // Theme-specific CSS should always be last so that it takes
+            // precedence over element-specific CSS. Applying extra styles
+            // last produces this result.
+            this.elementStyles = {};
+            this.elementStyleSet = new UxStyleSet().apply();
+            this.extraStyleSet = new UxStyleSet().apply();
+            // Extra CSS
+            if(options.extraCss){
+                this.addExtraStyle(options.extraCss);
+            }
+            // Add an event listener to handle styling new element types
             UxElement.addNewElementTypeListener(elementType => {
                 this.handleElementType(elementType);
             });
