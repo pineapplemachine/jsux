@@ -27,6 +27,9 @@
             this.styleObject = style;
         }
         constructor(options = {}){
+            if(typeof(options) === "string"){
+                options = {text: options};
+            }
             super(options);
             this.options = options;
             this.rootElement = createElement({
