@@ -1,0 +1,88 @@
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<script>
+
+    class UxProgressBar extends UxElement{
+        static css(theme){
+            const innerHeight = theme.lineHeight - 4;
+            return `
+            .uxProgressBar {
+                display: block;
+                position: relative;
+                margin: ${theme.elementMargin};
+                height: ${theme.lineHeight}px;
+                border-radius: ${theme.lineHeight / 2}px;
+                overflow: hidden;
+                box-sizing: border-box;
+                border-style: solid;
+                border-width: 2px;
+                border-color: ${theme.middleground};
+                background-color: ${theme.middlegroundDark};
+                background: linear-gradient(
+                    ${theme.middlegroundDark.opacity(0.5)}, transparent
+                );
+            }
+            .uxProgressBarFill {
+                display: block;
+                width: 0;
+                height: ${innerHeight}px;
+                background-color: ${theme.accent};
+                background: linear-gradient(
+                    ${theme.accent}, ${theme.accent.multiply(0.5)}
+                );
+            }
+            .uxProgressBarValue {
+                display: block;
+                position: absolute;
+                top: 0;
+                right: 0;
+                padding: 0 ${innerHeight / 2}px;
+                line-height: ${innerHeight}px;
+                font-size: ${theme.smallFontSize}px;
+                color: ${theme.foreground};
+            }
+            `;
+        }
+        get value(){
+            return this.progressValue;
+            return this.rootElement.innerText;
+        }
+        set value(value){
+            const percent = 100 * Math.max(0, Math.min(1, value));
+            this.progressValue = value;
+            this.valueElement.innerText = Math.round(percent) + "%";
+            this.fillElement.style.width = (
+                value > 0.99 ? "auto" : percent + "%"
+            );
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.options = options;
+            this.fillElement = createElement({
+                tag: "div",
+                class: "uxProgressBarFill",
+            });
+            this.valueElement = createElement({
+                tag: "div",
+                class: "uxProgressBarValue",
+            });
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxProgressBar",
+                children: [
+                    this.fillElement,
+                    this.valueElement,
+                ],
+            });
+            this.value = options.value || 0;
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

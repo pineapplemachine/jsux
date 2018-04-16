@@ -221,6 +221,9 @@
                 )
             );
         }
+        opacity(alpha){
+            return new UxColor(this.red, this.green, this.blue, alpha);
+        }
         constructor(red, green = undefined, blue = undefined, alpha = undefined){
             if(red !== undefined && green === undefined && blue === undefined){
                 const color = red;

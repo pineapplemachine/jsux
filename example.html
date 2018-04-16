@@ -16,6 +16,7 @@
             <link rel="import" href="hyperlink.html">
             <link rel="import" href="list.html">
             <link rel="import" href="panel.html">
+            <link rel="import" href="progress-bar.html">
             <link rel="import" href="radio.html">
             <link rel="import" href="radio-group.html">
             <link rel="import" href="radio-section.html">
@@ -184,6 +185,9 @@
                         id: "sliderBoth",
                         titleLeft: "left",
                         titleRight: "right",
+                    }),
+                    new UxProgressBar({
+                        id: "progressBar",
                     }),
                     new UxColorPicker({
                         id: "colorPicker",
@@ -395,6 +399,21 @@
                         tablesTab,
                     ]),
                 ]);
+                
+                checksTab.select();
+                
+                // Update the progress bar
+                // (a static progress bar would just be boring...)
+                const updateProgress = () => {
+                    panel.find.progressBar.value = (
+                        panel.find.progressBar.value + 0.0025
+                    );
+                    if(panel.find.progressBar.value > 2){
+                        panel.find.progressBar.value = -2;
+                    }
+                    setTimeout(updateProgress, 10);
+                };
+                updateProgress();
                 
                 panel.center();
             </script>
