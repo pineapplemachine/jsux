@@ -147,8 +147,10 @@
             });
             super.endConstructor(options);
         }
-        tab(options = {}){
-            return this.add(new UxTab(options));
+        addTab(options = {}){
+            const tab = new UxTab(options);
+            this.addOne(tab);
+            return tab;
         }
         addOne(child){
             super.addOne(child);

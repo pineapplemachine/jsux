@@ -24,6 +24,7 @@
                 class: "uxColumn",
             });
             this.setStyle(options.style);
+            super.endConstructor(options);
         }
     }
 
@@ -39,6 +40,7 @@
                 class: "uxColumns",
             });
             this.setStyle(options.style);
+            super.endConstructor(options);
         }
         updateColumnWidth(){
             const width = `${100 / this.children.length}%`;
@@ -47,7 +49,7 @@
                 column.element.style.width = width;
             }
         }
-        column(options = {}){
+        addColumn(options = {}){
             const column = new UxColumn(options);
             this.addOne(column);
             return column;
