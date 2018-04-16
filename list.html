@@ -122,7 +122,6 @@
             }
         }
         sort(orderFunction){
-            let needsSort = false;
             let firstChildElement = true;
             let firstSortOrder;
             let indexInParent = 0;
@@ -134,21 +133,17 @@
                 if(firstChildElement){
                     firstChildElement = false;
                     firstSortOrder = element.sortOrder;
-                }else if(element.sortOrder !== firstSortOrder){
-                    needsSort = true;
                 }
             }
-            if(true){
-                Array.prototype.sort.call(this.children, (a, b) => {
-                    if(a.order < b.order) return -1;
-                    if(a.order > b.order) return +1;
-                    if(a.indexInParent < b.indexInParent) return -1;
-                    if(a.indexInParent > b.indexInParent) return +1;
-                    return 0;
-                }).forEach(element => {
-                    this.childContainerElement.appendChild(element.element);
-                });
-            }
+            Array.prototype.sort.call(this.children, (a, b) => {
+                if(a.order < b.order) return -1;
+                if(a.order > b.order) return +1;
+                if(a.indexInParent < b.indexInParent) return -1;
+                if(a.indexInParent > b.indexInParent) return +1;
+                return 0;
+            }).forEach(element => {
+                this.childContainerElement.appendChild(element.element);
+            });
         }
         search(searchString){
             this.sort(itemElement => {
