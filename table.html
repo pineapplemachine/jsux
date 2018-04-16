@@ -144,7 +144,7 @@
                 content: options.title,
                 onclick: this.getEventHandler("click"),
             });
-            this.sort = options.sort;
+            this.comparator = options.comparator;
             this.value = options.value || options.title;
             this.lastSortAscending = false;
             this.setStyle(options.style);
@@ -284,7 +284,7 @@
             for(let element of this.children){
                 element.indexInParent = indexInParent++;
             }
-            const ascendingComparator = (a, b) => {
+            const ascendingComparator = header.comparator || (a, b) => {
                 const aValue = a.value[header.value];
                 const bValue = b.value[header.value];
                 if(aValue < bValue) return -1;
