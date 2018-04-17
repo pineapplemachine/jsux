@@ -14,6 +14,7 @@
             <link rel="import" href="edit-field.html">
             <link rel="import" href="html.html">
             <link rel="import" href="hyperlink.html">
+            <link rel="import" href="icon-toolbar.html">
             <link rel="import" href="list.html">
             <link rel="import" href="panel.html">
             <link rel="import" href="progress-bar.html">
@@ -33,7 +34,6 @@
             <link rel="import" href="text-field.html">
             <link rel="import" href="thumbs.html">
             <link rel="import" href="toggle-button.html">
-            <link rel="import" href="toolbar.html">
         </head>
         <body style='background-color: #040404; overflow: hidden; margin: 0;'>
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Grand_star-forming_region_R136_in_NGC_2070_%28captured_by_the_Hubble_Space_Telescope%29.jpg/752px-Grand_star-forming_region_R136_in_NGC_2070_%28captured_by_the_Hubble_Space_Telescope%29.jpg" style='
@@ -46,8 +46,8 @@
                 const checksTab = new UxTab({
                     title: "Clicky",
                 }).add([
-                    new UxToolbar({
-                        id: "toolbar",
+                    new UxIconToolbar({
+                        id: "iconToolbar",
                         items: [
                             {
                                 src: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Folder-new.svg/48px-Folder-new.svg.png",

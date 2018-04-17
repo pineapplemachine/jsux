@@ -4,20 +4,20 @@
 
 <script>
     
-    class UxToolbarItem extends UxElement{
+    class UxIconToolbarItem extends UxElement{
         static css(theme){
             return `
-            .uxToolbarItem {
+            .uxIconToolbarItem {
                 display: inline-block;
                 width: 32px;
                 height: 32px;
                 padding: 8px;
                 cursor: pointer;
             }
-            .uxToolbarItem:hover {
+            .uxIconToolbarItem:hover {
                 background-color: ${theme.middleground};
             }
-            .uxToolbarItem:active {
+            .uxIconToolbarItem:active {
                 background-color: ${theme.middlegroundDark};
             }
             `;
@@ -43,7 +43,7 @@
                 tag: "img",
                 src: options.src,
                 alt: options.title || options.tooltip,
-                class: "uxToolbarItem",
+                class: "uxIconToolbarItem",
                 onleftclick: event => {
                     if(this.onleftclick){
                         return this.onleftclick(event);
@@ -65,10 +65,10 @@
         }
     }
 
-    class UxToolbar extends UxContainerElement{
+    class UxIconToolbar extends UxContainerElement{
         static css(theme){
             return `
-            .uxToolbar {
+            .uxIconToolbar {
                 display: block;
                 position: relative;
                 width: 100%;
@@ -79,7 +79,7 @@
                 border-color: ${theme.middleground};
                 margin-bottom: 14px;
             }
-            .uxToolbarItemTitle {
+            .uxIconToolbarItemTitle {
                 display: block;
                 position: absolute;
                 font-size: 16px;
@@ -102,11 +102,11 @@
             this.options = options;
             this.itemTitleElement = createElement({
                 tag: "div",
-                class: "uxToolbarItemTitle",
+                class: "uxIconToolbarItemTitle",
             });
             this.rootElement = createElement({
                 tag: "div",
-                class: "uxToolbar",
+                class: "uxIconToolbar",
                 children: [this.itemTitleElement],
             });
             // Add items
@@ -116,7 +116,7 @@
             super.endConstructor(options);
         }
         addItem(options){
-            const itemElement = new UxToolbarItem(options);
+            const itemElement = new UxIconToolbarItem(options);
             itemElement.onmouseover = event => {
                 this.itemTitleElement.innerText = itemElement.title || "";
             };
