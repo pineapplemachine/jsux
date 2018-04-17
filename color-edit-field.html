@@ -1,0 +1,77 @@
+<link rel="import" href="color.html">
+<link rel="import" href="element.html">
+<link rel="import" href="helpers.html">
+
+<link rel="import" href="edit-field.html">
+
+<script>
+
+    class UxColorEditField extends UxElement{
+        static css(theme){
+            return `
+            .uxEditField.uxColorEditField > .uxButton {
+                border-color: ${theme.foreground};
+            }
+            .uxEditField.uxColorEditField > .uxButton:hover {
+                border-color: transparent;
+            }
+            .uxEditField.uxColorEditField > .uxButton:active {
+                border-color: transparent;
+            }
+            `;
+        }
+        get element(){
+            return this.editFieldElement.element;
+        }
+        get tooltipTargetElement(){
+            return this.editFieldElement.tooltipTargetElement;
+        }
+        get value(){
+            return this.editFieldElement.value;
+        }
+        set value(value){
+            const color = new UxColor(value);
+            this.editFieldElement.currentValue = color;
+            this.editFieldElement.valueElement.innerText = (
+                `${color.hex} ${color.getName()}`
+            );
+            const button = this.editFieldElement.buttonElement;
+            button.element.style.backgroundColor = color;
+            if(color.luma > 0.65){
+                button.element.style.color = "#111";
+            }else{
+                button.element.style.color = "#eee";
+            }
+        }
+        get title(){
+            return this.editFieldElement.title;
+        }
+        set title(title){
+            this.editFieldElement.title = title;
+        }
+        handleEvent(eventName, eventObject){
+            return this.editFieldElement.handleEvent(eventName, eventObject);
+        }
+        addEventListener(...args){
+            return this.editFieldElement.addEventListener(...args);
+        }
+        removeEventListener(...args){
+            return this.editFieldElement.removeEventListener(...args);
+        }
+        setStyle(style){
+            styleElement(this.rootElement, style);
+            this.styleObject = style;
+        }
+        constructor(options = {}){
+            super(options);
+            this.editFieldElement = this.inElementTree(new UxEditField());
+            this.editFieldElement.element.classList.add("uxColorEditField");
+            this.title = options.title;
+            this.value = options.value || "#808080";
+            // Set style
+            this.setStyle(options.style);
+            super.endConstructor(options);
+        }
+    }
+    
+</script>

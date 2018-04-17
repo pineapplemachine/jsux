@@ -7,6 +7,7 @@
             <!-- Import a bunch of UI elements -->
             <link rel="import" href="button.html">
             <link rel="import" href="checkbox.html">
+            <link rel="import" href="color-edit-field.html">
             <link rel="import" href="color-sliders.html">
             <link rel="import" href="columns.html">
             <link rel="import" href="div.html">
@@ -166,6 +167,42 @@
                         },
                     }),
                 ]);
+
+                const colorEditPanel = new UxPanel({
+                    title: "Color selection",
+                    id: "colorEditPanel",
+                    draggable: true,
+                    hideable: true,
+                    addToBody: true,
+                    hidden: true,
+                    style: {width: "200px"},
+                }).add([
+                    new UxText("Choose a color."),
+                    new UxColorSliders({id: "colorEditPicker"}),
+                    new UxColumns().add([
+                        new UxColumn().add(
+                            new UxButton({
+                                text: "Confirm",
+                                style: {float: "left", width: "80px"},
+                                onleftclick: event => {
+                                    colorEditPanel.hide();
+                                    panel.find.colorEditField.value = (
+                                        colorEditPanel.find.colorEditPicker.value
+                                    );
+                                },
+                            })
+                        ),
+                        new UxColumn().add(
+                            new UxButton({
+                                text: "Cancel",
+                                style: {float: "right", width: "80px"},
+                                onleftclick: event => {
+                                    colorEditPanel.hide();
+                                },
+                            })
+                        ),
+                    ]),
+                ]);
                 
                 const slidersTab = new UxTab({
                     title: "Sliders",
@@ -190,7 +227,17 @@
                         id: "progressBar",
                     }),
                     new UxColorSliders({
-                        id: "colorPicker",
+                        id: "colorSliders",
+                    }),
+                    new UxColorEditField({
+                        id: "colorEditField",
+                        title: "Choose a color",
+                        onedit: event => {
+                            colorEditPanel.frontAndCenter();
+                            colorEditPanel.find.colorEditPicker.value = (
+                                panel.find.colorEditField.value
+                            );
+                        },
                     }),
                 ]);
                 
