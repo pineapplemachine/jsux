@@ -51,9 +51,12 @@
                 border-color: transparent;
             }
             .uxRadioTitle {
-                display: inline;
+                display: none;
                 vertical-align: middle;
                 margin-left: ${radioHeight / 2}px;
+            }
+            .uxRadioWithTitle > .uxRadioTitle {
+                display: inline;
             }
             `;
         }
@@ -66,9 +69,7 @@
         set value(checked){
             if(!checked !== !this.inputElement.checked){
                 this.inputElement.checked = checked;
-                if(this.onchange){
-                    this.onchange(checked);
-                }
+                this.handleEvent("change", checked);
             }
         }
         get group(){
@@ -82,6 +83,7 @@
         }
         set title(title){
             this.titleElement.innerText = title;
+            updateClass("uxRadioWithTitle", title, this.rootElement);
         }
         toggle(){
             this.inputElement.checked = !this.inputElement.checked;
@@ -98,7 +100,6 @@
         constructor(options = {}){
             super(options);
             this.options = options;
-            this.onchange = options.onchange;
             this.inputElement = createElement({
                 tag: "input",
                 type: "radio",
@@ -112,7 +113,6 @@
             });
             this.titleElement = createElement({
                 tag: "div",
-                content: options.title || "[Untitled radio button]",
                 class: "uxRadioTitle",
             });
             this.rootElement = createElement({
@@ -129,6 +129,7 @@
                     }
                 },
             });
+            this.title = options.title;
             // Set style
             this.setStyle(options.style);
             super.endConstructor(options);

@@ -60,9 +60,12 @@
                 border-color: transparent;
             }
             .uxCheckboxTitle {
-                display: inline;
+                display: none;
                 vertical-align: middle;
                 margin-left: ${checkHeight / 2}px;
+            }
+            .uxCheckboxWithTitle > .uxCheckboxTitle {
+                display: inline;
             }
             `;
         }
@@ -75,9 +78,7 @@
         set value(checked){
             if(checked !== this.inputElement.checked){
                 this.inputElement.checked = checked;
-                if(this.onchange){
-                    this.onchange(checked);
-                }
+                this.handleEvent("change", checked);
             }
         }
         get title(){
@@ -85,6 +86,7 @@
         }
         set title(title){
             this.titleElement.innerText = title;
+            updateClass("uxCheckboxWithTitle", title, this.rootElement);
         }
         setStyle(style){
             styleElement(this.rootElement, style);
@@ -95,7 +97,6 @@
         constructor(options = {}){
             super(options);
             this.options = options;
-            this.onchange = options.onchange;
             this.inputElement = createElement({
                 tag: "input",
                 type: "checkbox",
@@ -108,7 +109,6 @@
             });
             this.titleElement = createElement({
                 tag: "div",
-                content: options.title || "[Untitled checkbox]",
                 class: "uxCheckboxTitle",
             });
             this.rootElement = createElement({
@@ -123,6 +123,7 @@
                     }
                 },
             });
+            this.title = options.title;
             // Set style
             this.setStyle(options.style);
             super.endConstructor(options);
