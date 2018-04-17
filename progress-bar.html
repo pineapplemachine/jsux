@@ -32,15 +32,20 @@
                     ${theme.accent}, ${theme.accent.multiply(0.5)}
                 );
             }
-            .uxProgressBarValue {
+            .uxProgressBarTitle, .uxProgressBarValue {
                 display: block;
                 position: absolute;
                 top: 0;
-                right: 0;
                 padding: 0 ${innerHeight / 2}px;
                 line-height: ${innerHeight}px;
                 font-size: ${theme.smallFontSize}px;
                 color: ${theme.foreground};
+            }
+            .uxProgressBarTitle {
+                left: 0;
+            }
+            .uxProgressBarValue {
+                right: 0;
             }
             `;
         }
@@ -56,6 +61,12 @@
                 value > 0.99 ? "auto" : percent + "%"
             );
         }
+        get title(){
+            return this.titleElement.innerText;
+        }
+        set title(title){
+            this.titleElement.innerText = title;
+        }
         setStyle(style){
             styleElement(this.rootElement, style);
             this.styleObject = style;
@@ -67,6 +78,10 @@
                 tag: "div",
                 class: "uxProgressBarFill",
             });
+            this.titleElement = createElement({
+                tag: "div",
+                class: "uxProgressBarTitle",
+            });
             this.valueElement = createElement({
                 tag: "div",
                 class: "uxProgressBarValue",
@@ -76,6 +91,7 @@
                 class: "uxProgressBar",
                 children: [
                     this.fillElement,
+                    this.titleElement,
                     this.valueElement,
                 ],
             });
