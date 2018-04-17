@@ -5,16 +5,16 @@
 
 <script>
 
-    class UxColorPicker extends UxElement{
+    class UxColorSliders extends UxElement{
         static css(theme){
             return `
-            .uxColorPicker {
+            .uxColorSliders {
                 display: block;
                 position: relative;
                 height: 60px;
                 margin: ${theme.elementMargin};
             }
-            .uxColorPickerPreview{
+            .uxColorSlidersPreview{
                 display: block;
                 position: relative;
                 margin: 0;
@@ -28,7 +28,7 @@
                 border-radius: 2px;
                 order: 10;
             }
-            .uxColorPickerPreviewHex {
+            .uxColorSlidersPreviewHex {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -40,13 +40,13 @@
                 line-height: 16px;
                 background-color: ${theme.middlegroundDark};
             }
-            .uxColorPicker:hover > .uxColorPickerPreview > .uxColorPickerPreviewHex {
+            .uxColorSliders:hover > .uxColorSlidersPreview > .uxColorSlidersPreviewHex {
                 display: block;
             }
-            .uxColorPicker:active > .uxColorPickerPreview > .uxColorPickerPreviewHex {
+            .uxColorSliders:active > .uxColorSlidersPreview > .uxColorSlidersPreviewHex {
                 display: block;
             }
-            .uxColorPickerCursor {
+            .uxColorSlidersCursor {
                 display: block;
                 width: 12px;
                 height: 12px;
@@ -61,7 +61,7 @@
                 border-radius: 2px;
                 cursor: pointer;
             }
-            .uxColorPickerSlider {
+            .uxColorSlidersSlider {
                 display: block;
                 position: absolute;
                 right: 0px;
@@ -73,19 +73,19 @@
                 border-radius: 2px;
                 cursor: pointer;
             }
-            .uxColorPickerSliderRed{
+            .uxColorSlidersSliderRed{
                 background-color: #c11;
                 background: linear-gradient(to right, #000, #f00);
                 border-color: #522;
                 top: 2px;
             }
-            .uxColorPickerSliderGreen{
+            .uxColorSlidersSliderGreen{
                 background-color: #1c1;
                 background: linear-gradient(to right, #000, #0f0);
                 border-color: #252;
                 top: 24px;
             }
-            .uxColorPickerSliderBlue{
+            .uxColorSlidersSliderBlue{
                 background-color: #11c;
                 background: linear-gradient(to right, #000, #00f);
                 border-color: #225;
@@ -140,21 +140,21 @@
             // Preview
             this.previewHexElement = createElement({
                 tag: "div",
-                class: "uxColorPickerPreviewHex",
+                class: "uxColorSlidersPreviewHex",
             });
             this.previewElement = createElement({
                 tag: "div",
-                class: "uxColorPickerPreview",
+                class: "uxColorSlidersPreview",
                 children: [this.previewHexElement],
             });
             // Red
             this.redCursorElement = createElement({
                 tag: "div",
-                classList: ["uxColorPickerCursor", "uxColorPickerCursorRed"],
+                classList: ["uxColorSlidersCursor", "uxColorSlidersCursorRed"],
             });
             this.redSliderElement = createElement({
                 tag: "div",
-                classList: ["uxColorPickerSlider", "uxColorPickerSliderRed"],
+                classList: ["uxColorSlidersSlider", "uxColorSlidersSliderRed"],
                 children: [this.redCursorElement],
             });
             this.redSlider = new Slider({
@@ -171,11 +171,11 @@
             // Green
             this.greenCursorElement = createElement({
                 tag: "div",
-                classList: ["uxColorPickerCursor", "uxColorPickerCursorGreen"],
+                classList: ["uxColorSlidersCursor", "uxColorSlidersCursorGreen"],
             });
             this.greenSliderElement = createElement({
                 tag: "div",
-                classList: ["uxColorPickerSlider", "uxColorPickerSliderGreen"],
+                classList: ["uxColorSlidersSlider", "uxColorSlidersSliderGreen"],
                 children: [this.greenCursorElement],
             });
             this.greenSlider = new Slider({
@@ -192,11 +192,11 @@
             // Blue
             this.blueCursorElement = createElement({
                 tag: "div",
-                classList: ["uxColorPickerCursor", "uxColorPickerCursorBlue"],
+                classList: ["uxColorSlidersCursor", "uxColorSlidersCursorBlue"],
             });
             this.blueSliderElement = createElement({
                 tag: "div",
-                classList: ["uxColorPickerSlider", "uxColorPickerSliderBlue"],
+                classList: ["uxColorSlidersSlider", "uxColorSlidersSliderBlue"],
                 children: [this.blueCursorElement],
             });
             this.blueSlider = new Slider({
@@ -214,7 +214,7 @@
             this.rootElement = createElement({
                 tag: "div",
                 value: options.value,
-                class: "uxColorPicker",
+                class: "uxColorSliders",
                 children: [
                     this.previewElement,
                     this.redSliderElement,
