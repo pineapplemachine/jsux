@@ -24,7 +24,7 @@
         }
         set group(group){
             this.radioGroup = group;
-            for(let radio of this.radioElements){
+            for(let radio of this.children){
                 radio.group = group;
             }
         }
@@ -43,39 +43,40 @@
             }
             return this;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                radio: this.children,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.onchange = options.onchange;
             this.radioGroup = options.group || (
                 `UxRadioGroup #${UxRadioGroup.autoGroupCounter++}`
             );
-            this.radioElements = [];
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxRadioGroup",
             });
             this.addItems(options.items);
             this.value = options.value;
-            // Set style
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
         addItem(options){
-            const radio = new UxRadio(options);
-            radio.group = this.group;
+            return this.addOne(new UxRadio(options));
+        }
+        addOne(child){
+            super.addOne(child);
+            child.group = this.group;
             radio.addEventListener("change", value => {
                 if(value){
                     this.selectedItem = radio;
                 }else{
                     this.selectedItem = undefined;
                 }
+                this.handleEvent("select", this.selectedItem);
+                this.handleEvent("change", this.value);
             });
-            return this.addOne(radio);
         }
     }
     

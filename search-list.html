@@ -129,37 +129,50 @@
             return this.searchInputElement.focus();
         }
         // UxSearchList
-        setStyle(style){
-            // TODO: more sensible styling
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
+        handleSearchInputKeyEvent(event){
+            if(event.key === "ArrowUp" || event.key === "ArrowDown"){
+                this.handleActiveCursorKeyEvent(event);
+                return false;
+            }else if(event.key === "Enter"){
+                // If exactly one item is visible and it
+                // isn't already selected, select it now
+                if(!this.activeItem){
+                    const visible = this.getVisibleChildren();
+                    if(visible.length === 1){
+                        this.activeItem = visible[0];
+                    }
+                }
+                if(this.activeItem){
+                    this.select(this.activeItem);
+                }
+                return false;
+            }
+        }
+        getChildElement(attribute){
+            return {
+                list: this.listElement,
+                search: this.searchInputElement,
+                scroll: this.scrollAreaElement,
+            }[attribute] || (
+                this.listElement.getChildElement(attribute)
+            ) || (
+                this.searchInputElement.getChildElement(attribute)
+            ) || (
+                this.scrollAreaElement.getChildElement(attribute)
+            );
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.listElement = this.inElementTree(new UxScrollList());
+            this.listElement.addEventListener("change", this.getEventHandler("change"));
+            this.listElement.addEventListener("select", this.getEventHandler("select"));
             this.searchInputElement = this.inElementTree(new UxSearchInput());
             this.searchInputElement.addEventListener("input", event => {
                 this.listElement.search(this.searchString);
+                this.handleEvent("input");
             });
             this.searchInputElement.addEventListener("keydown", event => {
-                if(event.key === "ArrowUp" || event.key === "ArrowDown"){
-                    this.handleActiveCursorKeyEvent(event);
-                    return false;
-                }else if(event.key === "Enter"){
-                    // If exactly one item is visible and it
-                    // isn't already selected, select it now
-                    if(!this.activeItem){
-                        const visible = this.getVisibleChildren();
-                        if(visible.length === 1){
-                            this.activeItem = visible[0];
-                        }
-                    }
-                    if(this.activeItem){
-                        this.select(this.activeItem);
-                    }
-                    return false;
-                }
+                return this.handleSearchInputKeyEvent(event);
             });
             this.rootElement = createElement({
                 tag: "div",
@@ -174,8 +187,7 @@
             // Set value and state
             this.value = options.value;
             this.placeholder = options.placeholder || "Search in list...";
-            // Set style
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
     }

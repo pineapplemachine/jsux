@@ -60,20 +60,22 @@
             return this.scrollAreaElement.scrollTo(element);
         }
         // UxScrollSection
-        setStyle(style){
-            // TODO: more sensible styling
-            styleElement(this.sectionElement.rootElement, style);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                section: this.sectionElement,
+                scroll: this.scrollAreaElement,
+            }[attribute] || (
+                this.sectionElement.getChildElement(attribute)
+            ) || (
+                this.scrollAreaElement.getChildElement(attribute)
+            );
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.sectionElement = this.inElementTree(new UxSection(options));
             this.scrollAreaElement = this.inElementTree(new UxScrollArea());
-            this.sectionElement.element.classList.add("uxScrollSection");
+            this.sectionElement.addClass("uxScrollSection");
             this.sectionElement.add(this.scrollAreaElement);
-            // Set style
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }

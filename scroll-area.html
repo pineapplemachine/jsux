@@ -85,16 +85,15 @@
                 this.scroll = element.offsetTop - maxVisibleY;
             }
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            styleElement(this.contentElement, style && style.content);
-            styleElement(this.scrollBarElement, style && style.scrollBar);
-            styleElement(this.scrollCursorElement, style && style.scrollCursor);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                content: this.contentElement,
+                slider: this.scrollBarElement,
+                cursor: this.scrollCursorElement,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.contentElement = createElement({
                 tag: "div",
                 class: "uxScrollAreaContent",
@@ -139,11 +138,11 @@
                     this.scrollCursorElement.style.top = position;
                 },
             });
+            // Set state
             if(options.scroll){
                 this.scroll = options.scroll;
             }
-            // Set style
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
     }

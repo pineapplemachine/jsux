@@ -145,19 +145,17 @@
                 requestAnimationFrame(() => this.center());
             }
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            styleElement(this.titleElement, style && style.title);
-            styleElement(this.headerElement, style && style.header);
-            styleElement(this.contentElement, style && style.content);
-            styleElement(this.hideButtonElement, style && style.hideIcon);
-            styleElement(this.collapseButtonElement, style && style.collapseIcon);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                header: this.headerElement,
+                title: this.titleElement,
+                hideButton: this.hideButtonElement,
+                collapseButton: this.collapseButtonElement,
+                content: this.contentElement,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
-            this.id = options.id;
             // Add essential elements
             this.titleElement = createElement({
                 tag: "div",
@@ -255,8 +253,7 @@
             if(options.centered){
                 this.center();
             }
-            // Set style
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
     }

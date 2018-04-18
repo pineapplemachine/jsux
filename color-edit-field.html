@@ -62,9 +62,8 @@
         removeEventListener(...args){
             return this.editFieldElement.removeEventListener(...args);
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return this.editFieldElement.getChildElement(attribute);
         }
         constructor(options = {}){
             super(options);
@@ -72,8 +71,6 @@
             this.editFieldElement.element.classList.add("uxColorEditField");
             this.title = options.title;
             this.value = options.value || "#808080";
-            // Set style
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }

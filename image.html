@@ -18,20 +18,14 @@
         set src(src){
             this.rootElement.src = src;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
-        }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.rootElement = createElement({
                 tag: "img",
                 src: options.src,
                 alt: options.tooltip,
                 class: "uxImage",
             });
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }

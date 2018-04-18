@@ -40,36 +40,25 @@
             this.rootElement.src = src;
         }
         get selected(){
-            return this.rootElement.classList.contains("uxThumbsItemSelected");
+            return this.hasClass("uxThumbsItemSelected");
         }
         set selected(selected){
-            updateClass("uxThumbsItemSelected", selected, this.rootElement);
+            this.updateClass("uxThumbsItemSelected", selected);
         }
         select(){
             this.parent.select(this);
             return this;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
-        }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.value = options.value;
-            this.onleftclick = options.onleftclick;
             this.rootElement = createElement({
                 tag: "img",
                 src: options.src,
                 alt: options.tooltip,
                 class: "uxThumbsItem",
-                onleftclick: event => {
-                    if(this.onleftclick){
-                        return this.onleftclick(event);
-                    }
-                },
+                onclick: this.getEventHandler("click"),
             });
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }
@@ -108,41 +97,30 @@
                     itemElement.selected = true;
                 }
                 this.selectedItem = itemElement;
-                if(this.onchange){
-                    this.onchange(this.value);
-                }
+                this.handleEvent("select", this.selectedItem);
+                this.handleEvent("change", this.value);
             }
             return this;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            if(style && style.item){
-                for(let item of this.rootElement.children){
-                    styleElement(item, style.item);
-                }
-            }
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                thumb: this.children,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
-            this.onchange = options.onchange;
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxThumbs",
-                style: options.style,
             });
-            // Add items
             this.addItems(options.items);
-            // Set style, then all done
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
         addItem(options){
             const itemElement = new UxThumbsItem(options);
-            itemElement.onleftclick = event => {
+            itemElement.addEventListener("leftclick", event => {
                 this.select(itemElement);
-            };
+            });
             return this.addOne(itemElement);
         }
     }

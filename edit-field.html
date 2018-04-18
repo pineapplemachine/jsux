@@ -57,15 +57,15 @@
         set title(title){
             this.titleElement.innerText = title;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            styleElement(this.titleElement, style && style.title);
-            styleElement(this.valueElement, style && style.value);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                title: this.titleElement,
+                value: this.valueElement,
+                button: this.buttonElement,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.currentValue = options.value;
             this.titleElement = createElement({
                 tag: "div",
@@ -89,7 +89,6 @@
                     this.valueElement,
                 ],
             });
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }

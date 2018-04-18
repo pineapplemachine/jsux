@@ -18,19 +18,13 @@
             removeChildren(this.rootElement);
             this.rootElement.innerHTML = html;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
-        }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxHtml",
             });
             this.html = options.html || "";
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }

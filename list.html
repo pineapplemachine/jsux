@@ -60,13 +60,8 @@
             this.parent.select(this);
             return this;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
-        }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxListItem",
@@ -79,8 +74,7 @@
             this.sortOrder = options.sortOrder;
             this.key = options.key || options.title;
             this.value = options.value;
-            // Apply styles
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
     }
@@ -268,7 +262,8 @@
                     itemElement.selected = true;
                 }
                 this.selectedItem = itemElement;
-                this.handleEvent("change", this);
+                this.handleEvent("select", this.selectedItem);
+                this.handleEvent("change", this.value);
             }
         }
         selectActiveItem(){
@@ -283,13 +278,13 @@
             }
             return false;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                item: this.children,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxList",
@@ -301,8 +296,7 @@
             this.addItems(options.items);
             // Set value and state
             this.value = options.value;
-            // Set style
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
         addItem(options){

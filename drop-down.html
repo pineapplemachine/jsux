@@ -38,7 +38,6 @@
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxDropDownItem",
@@ -49,8 +48,7 @@
             // Set state
             this.title = options.title;
             this.value = options.value;
-            // Apply styles
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
     }
@@ -190,22 +188,22 @@
                 }
                 this.selectedItem = itemElement;
                 this.valueElement.innerText = itemElement.title;
-                this.handleEvent("change", this);
+                this.handleEvent("select", this.selectedItem);
+                this.handleEvent("change", this.value);
             }
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            styleElement(this.titleElement, style && style.title);
-            styleElement(this.listElement, style && style.list);
-            styleElement(this.valueElement, style && style.selection);
-            styleElement(this.bodyElement, style && style.body);
-            styleElement(this.buttonElement, style && style.button);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                title: this.titleElement,
+                body: this.bodyElement,
+                value: this.valueElement,
+                button: this.buttonElement,
+                list: this.listElement,
+                item: this.children,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
-            this.onchange = options.onchange;
             this.titleElement = createElement({
                 tag: "div",
                 class: "uxDropDownTitle",
@@ -254,8 +252,7 @@
             // Set state
             this.title = options.title;
             this.select(this.children[0]);
-            // Apply style
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
         addItem(options){

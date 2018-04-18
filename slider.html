@@ -158,14 +158,21 @@
                 this.rootElement.classList.remove("uxSliderWithCursorRight");
             }
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                body: this.bodyBarElement,
+                cursor: this.scrollCursorElement,
+                value: this.valueCursorElement,
+                leftTitle: this.leftTitleElement,
+                rightTitle: this.rightTitleElement,
+                title: [
+                    this.leftTitleElement,
+                    this.rightTitleElement,
+                ],
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
-            this.integerValue = options.integer || false;
             // Add elements
             this.leftTitleElement = createElement({
                 tag: "div",
@@ -186,7 +193,10 @@
             this.bodyElement = createElement({
                 tag: "div",
                 class: "uxSliderBody",
-                children: [this.valueElement, this.cursorElement],
+                children: [
+                    this.valueElement,
+                    this.cursorElement,
+                ],
             });
             this.valueSlider = new Slider({
                 horizontal: true,
@@ -208,16 +218,16 @@
                     this.rightTitleElement,
                 ],
             });
+            // Handle state
             this.titleLeft = options.titleLeft;
             this.titleRight = options.titleRight;
-            // Handle initial value state
+            this.integerValue = options.integer || false;
             this.minValue = options.min || 0;
             this.maxValue = options.max || 1;
             this.value = options.value || (
                 0.5 * (this.maxValue - this.minValue)
             );
-            // Set style, then all done!
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
     }

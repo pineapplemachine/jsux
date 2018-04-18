@@ -7,18 +7,12 @@
         get childContainerElement(){
             return this.rootElement;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
-        }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxDiv",
             });
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }

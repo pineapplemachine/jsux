@@ -55,14 +55,13 @@
             // https://stackoverflow.com/a/4075072/4099022
             this.inputElement.blur();
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            styleElement(this.inputElement, style && style.input);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                input: this.inputElement,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.inputElement = createElement({
                 tag: "textarea",
                 class: "uxTextAreaInput",
@@ -76,7 +75,6 @@
                 class: "uxTextArea",
                 children: [this.inputElement],
             });
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }

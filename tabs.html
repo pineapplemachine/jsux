@@ -13,6 +13,12 @@
         get childContainerElement(){
             return this.contentElement;
         }
+        get title(){
+            return this.headerElement.innerText;
+        }
+        set title(title){
+            this.headerElement.innerText = title;
+        }
         get selected(){
             return this.headerElement.classList.contains("uxTabHeaderSelected");
         }
@@ -24,15 +30,14 @@
             this.parent.select(this);
             return this;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            styleElement(this.headerElement, style && style.header);
-            styleElement(this.contentElement, style && style.content);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                header: this.headerElement,
+                content: this.contentElement,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.contentElement = createElement({
                 tag: "div",
                 class: "uxTabContent",
@@ -40,12 +45,8 @@
             this.headerElement = createElement({
                 tag: "div",
                 class: "uxTabHeader",
-                content: options.title,
-                onleftclick: event => {
-                    this.select();
-                },
             });
-            this.setStyle(options.style);
+            this.title = options.title;
             super.endConstructor(options);
         }
     }
@@ -115,31 +116,31 @@
             }
             return this;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            styleElement(this.headerElement, style && style.header);
-            styleElement(this.contentElement, style && style.content);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                tab: this.children,
+                header: this.headerElement,
+                content: this.contentElement,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.children = [];
             this.headerElement = createElement({
                 tag: "div",
                 class: "uxTabsHeaderContainer",
-                style: options.style && options.style.header,
             });
             this.contentElement = createElement({
                 tag: "div",
                 class: "uxTabsContentContainer",
-                style: options.style && options.style.content,
             });
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxTabs",
-                children: [this.headerElement, this.contentElement],
-                style: options.style,
+                children: [
+                    this.headerElement,
+                    this.contentElement,
+                ],
             });
             super.endConstructor(options);
         }
@@ -154,6 +155,9 @@
                 this.contentElement.appendChild(child.childContainerElement);
             }
             if(this.children.length === 1){
+                this.select(child);
+            }
+            child.addEventListener("leftclick", event => {
                 this.select(child);
             }
         }

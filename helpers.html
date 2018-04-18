@@ -192,5 +192,22 @@
         rect.bottom -= window.scrollY;
         return rect;
     }
+    
+    function isObject(value){
+        if(
+            value === null ||
+            value === undefined ||
+            value instanceof Boolean ||
+            value instanceof Number ||
+            value instanceof String
+        ){
+            return false;
+        }
+        const type = typeof(value);
+        return (
+            type !== "boolean" && type !== "number" &&
+            type !== "string" && type !== "symbol"
+        );
+    }
 
 </script>

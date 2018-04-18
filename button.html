@@ -34,20 +34,14 @@
         set text(text){
             this.rootElement.innerText = text;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
-        }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxButton",
                 onclick: this.getEventHandler("click"),
             })
             this.text = options.text || "";
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }

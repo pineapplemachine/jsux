@@ -52,7 +52,6 @@
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxToggleButton",
@@ -61,7 +60,6 @@
                     this.value = !this.value;
                 },
             })
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }

@@ -25,6 +25,9 @@
         get tooltipTargetElement(){
             return this.rootElement;
         }
+        getChildElement(attribute){
+            return undefined;
+        }
         show(){
             this.element.classList.remove("uxElementHidden");
         }
@@ -44,10 +47,6 @@
             }else{
                 return this.hide();
             }
-        }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
         }
         stitchSiblings(){
             if(this.prevSibling){
@@ -96,9 +95,110 @@
                 );
             }
         }
-        // TODO: use a proxy for neat style updating
-        get style(){
-            return this.styleObject;
+        setStyle(style){
+            this.clearStyles();
+            this.applyStyle(style);
+        }
+        applyStyle(style){
+            if(!style){
+                return;
+            }
+            for(let attribute in style){
+                this.style[attribute] = style[attribute];
+            }
+        }
+        clearStyles(){
+            if(this.element){
+                this.element.style = {};
+            }
+        }
+        getStyleProxy(){
+            return new Proxy({}, {
+                get: (object, attribute) => {
+                    const target = (attribute === "children" ?
+                        this.children : this.getChildElement(attribute)
+                    );
+                    if(target instanceof Array){
+                        return UxElement.getGroupStyleProxy(target);
+                    }else if(target){
+                        return target.style;
+                    }else if(this.element){
+                        return this.element.style[attribute];
+                    }
+                },
+                set: (object, attribute, value) => {
+                    if(isObject(value)){
+                        const target = (attribute === "children" ?
+                            this.children : this.getChildElement(attribute)
+                        );
+                        if(target instanceof Array){
+                            for(let element of target){
+                                element.setStyle(value);
+                            }
+                        }else if(target){
+                            target.setStyle(value);
+                        }else if(this.element){
+                            this.element.style[attribute] = value;
+                        }
+                    }else if(this.element){
+                        this.element.style[attribute] = value;
+                    }
+                    return true;
+                },
+                deleteProperty: (object, attribute) => {
+                    this.style[attribute] = null;
+                    return true;
+                },
+            });
+        }
+        static getGroupStyleProxy(elements){
+            return new Proxy({}, {
+                get: (object, attribute) => {
+                    return elements[0] && elements[0].style[attribute];
+                },
+                set: (object, attribute, value) => {
+                    for(let element of elements){
+                        element.style[attribute] = value;
+                    }
+                    return true;
+                },
+                deleteProperty: (object, attribute) => {
+                    for(let element of elements){
+                        delete element.style[attribute];
+                    }
+                    return true;
+                },
+            });
+        }
+        // Add a class to the root DOM element
+        addClass(value){
+            return this.element.classList.add(value);
+        }
+        // Remove a class from the root DOM element
+        removeClass(value){
+            return this.element && this.element.classList.remove(value);
+        }
+        // Check if the root DOM element has a class
+        hasClass(value){
+            return this.element && this.element.classList.contains(value);
+        }
+        // Add a class to the root DOM element if it does not already have it.
+        // If it does already have the class, remove it.
+        toggleClass(value){
+            if(this.hasClass(value)){
+                this.removeClass(value);
+            }else{
+                this.addClass(value);
+            }
+        }
+        // If the condition is satisfied, ensure the root DOM element has a
+        // givne class. Otherwise ensure that it does not.
+        updateClass(value, condition){
+            if(condition){
+                this.addClass(value);
+            }else{
+                this.removeClass(value);
+            }
         }
         constructor(options){
             super();
@@ -108,6 +208,8 @@
             this.prevSibling = undefined;
             this.nextSibling = undefined;
             this.tooltipObject = undefined;
+            this.elementsById = {};
+            this.style = this.getStyleProxy();
             const ctor = this.constructor;
             if(!UxElement.allElementTypes[ctor.name]){
                 UxElement.allElementTypes[ctor.name] = ctor;
@@ -121,7 +223,7 @@
             if(this.element){
                 this.element.classList.add("uxElement");
             }
-            if(options.id && this.element){
+            if(this.element){
                 this.element.id = options.id;
             }
             if(options.addToBody){
@@ -132,6 +234,9 @@
                 this.tooltipObject = new UxTooltip(
                     this.tooltipTargetElement, options.tooltip
                 );
+            }
+            if(options.style){
+                this.applyStyle(options.style);
             }
             if(options.onleftclick){
                 this.addEventListener("leftclick", options.onleftclick);
@@ -177,6 +282,9 @@
             }
             if(options.onedit){
                 this.addEventListener("edit", options.onedit);
+            }
+            if(options.onselect){
+                this.addEventListener("select", options.onchange);
             }
         }
         *iterateElementTree(){
@@ -226,7 +334,6 @@
             // Some elements might have a getter that forwards to a another
             // element's children instead of having their own list
             if(!("children" in this)) this.children = [];
-            this.elementsById = {};
         }
         get childContainerElement(){
             return this.rootElement;
@@ -322,5 +429,5 @@
     
     UxElement.allElementTypes = {};
     UxElement.newElementTypeListeners = [];
-
+    
 </script>

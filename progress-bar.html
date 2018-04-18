@@ -67,13 +67,15 @@
         set title(title){
             this.titleElement.innerText = title;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                fill: this.fillElement,
+                title: this.titleElement,
+                value: this.valueElement,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.fillElement = createElement({
                 tag: "div",
                 class: "uxProgressBarFill",
@@ -96,7 +98,6 @@
                 ],
             });
             this.value = options.value || 0;
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }

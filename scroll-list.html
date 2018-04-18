@@ -102,17 +102,23 @@
             return this.scrollAreaElement.scrollTo(element);
         }
         // UxScrollList
-        setStyle(style){
-            // TODO: more sensible styling
-            styleElement(this.scrollAreaElement.rootElement, style);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                list: this.listElement,
+                scroll: this.scrollAreaElement,
+            }[attribute] || (
+                this.listElement.getChildElement(attribute)
+            ) || (
+                this.scrollAreaElement.getChildElement(attribute)
+            );
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.scrollAreaElement = this.inElementTree(new UxScrollArea());
-            this.scrollAreaElement.element.classList.add("uxScrollList");
+            this.scrollAreaElement.addClass("uxScrollList");
             this.listElement = this.inElementTree(new UxList());
+            this.listElement.addEventListener("change", this.getEventHandler("change"));
+            this.listElement.addEventListener("select", this.getEventHandler("select"));
             this.listElement.addEventListener("activecursorup", itemElement => {
                 this.scrollTo(itemElement && itemElement.element);
             });
@@ -122,10 +128,9 @@
             this.scrollAreaElement.add(this.listElement);
             // Add initial list items
             this.addItems(options.items);
-            // Set value and state
+            // Set state
             this.value = options.value;
-            // Set style
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
     }

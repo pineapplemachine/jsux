@@ -10,6 +10,10 @@
         get element(){
             return this.sectionElement.element;
         }
+        // UxRadioGroup
+        get children(){
+            return this.radioGroupElement.children;
+        }
         get value(){
             return this.radioGroupElement.value;
         }
@@ -22,42 +26,63 @@
         set group(group){
             this.radioGroupElement.group = group;
         }
+        select(radio){
+            this.radioGroupElement.select(radio);
+            return this;
+        }
+        addItem(options){
+            return this.radioGroupElement.addItem(options);
+        }
+        addOne(child){
+            return this.radioGroupElement.addOne(child);
+        }
+        // UxSection
         get title(){
             return this.sectionElement.title;
         }
         set title(title){
             this.sectionElement.title = title;
         }
-        select(radio){
-            this.radioGroupElement.select(radio);
-            return this;
+        get collapsible(){
+            return this.sectionElement.collapsible;
         }
-        setStyle(style){
-            styleElement(this.sectionElement.element, style);
-            this.styleObject = style;
+        set collapsible(collapsible){
+            this.sectionElement.collapsible = collapsible;
+        }
+        get collapsed(){
+            return this.sectionElement.collapsed;
+        }
+        set collapsed(collapsed){
+            this.sectionElement.collapsed = collapsed;
+        }
+        // UxRadioSection
+        getChildElement(attribute){
+            return {
+                radioGroup: this.radioGroupElement,
+                section: this.sectionElement,
+            }[attribute] || (
+                this.radioGroupElement.getChildElement[attribute]
+            ) || (
+                this.sectionElement.getChildElement[attribute]
+            );
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
-            this.sectionElement = this.inElementTree(new UxSection({
-                title: options.title,
-                tooltip: options.tooltip,
-            }));
             this.radioGroupElement = this.inElementTree(new UxRadioGroup({
                 value: options.value,
                 group: options.group,
                 items: options.items,
+                onchange: this.getEventHandler("change"),
+                onselect: this.getEventHandler("select"),
+            }));
+            this.sectionElement = this.inElementTree(new UxSection({
+                title: options.title,
+                tooltip: options.tooltip,
+                collapsible: options.collapsible,
+                collapsed: options.collapsed,
             }));
             this.sectionElement.add(this.radioGroupElement);
-            // Set style
-            this.setStyle(options.style);
             super.endConstructor(options);
-        }
-        addItem(options){
-            return this.radioGroupElement.addItem(options);
-        }
-        addItems(optionsList){
-            return this.radioGroupElement.addItems(optionsList);
         }
     }
     

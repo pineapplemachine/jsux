@@ -88,15 +88,14 @@
             this.titleElement.innerText = title;
             updateClass("uxCheckboxWithTitle", title, this.rootElement);
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            styleElement(this.iconElement, style && style.icon);
-            styleElement(this.titleElement, style && style.title);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                title: this.titleElement,
+                icon: this.iconElement,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.inputElement = createElement({
                 tag: "input",
                 type: "checkbox",
@@ -124,8 +123,6 @@
                 },
             });
             this.title = options.title;
-            // Set style
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }

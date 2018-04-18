@@ -81,15 +81,8 @@
                 this.valueObject[header.value] = value;
             }
         }
-        constructor(options = {}){
-            super(options);
-            this.rootElement = createElement({
-                tag: "div",
-                class: "uxTableRow",
-            });
-            this.cellsByName = {};
-            this.valueObject = options || {};
-            this.valueProxy = new Proxy({}, {
+        getValueProxy(){
+            return new Proxy({}, {
                 get: (object, attribute) => {
                     const index = parseInt(attribute);
                     if(index === index){
@@ -101,13 +94,28 @@
                 set: (object, attribute, value) => {
                     const index = parseInt(attribute);
                     if(index === index){
-                        return this.setValueAtIndex(index, value);
+                        this.setValueAtIndex(index, value);
                     }else{
-                        return this.setValueByName(attribute, value);
+                        this.setValueByName(attribute, value);
                     }
+                    return true;
                 },
             });
-            this.setStyle(options.style);
+        }
+        getChildElement(attribute){
+            return {
+                cell: this.cells,
+            }[attribute];
+        }
+        constructor(options = {}){
+            super(options);
+            this.rootElement = createElement({
+                tag: "div",
+                class: "uxTableRow",
+            });
+            this.cellsByName = {};
+            this.valueObject = options || {};
+            this.valueProxy = this.getValueProxy();
             super.endConstructor(options);
         }
     }
@@ -137,7 +145,6 @@
                 options = {title: options};
             }
             super(options);
-            this.options = options;
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxTableHeader",
@@ -147,7 +154,6 @@
             this.comparator = options.comparator;
             this.value = options.value || options.title;
             this.lastSortAscending = false;
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }
@@ -302,9 +308,16 @@
                 this.childContainerElement.appendChild(element.element);
             });
         }
+        getChildElement(attribute){
+            return {
+                row: this.children,
+                header: this.headerList,
+                headerRow: this.headerElement,
+                content: this.contentElement,
+            }[attribute];
+        }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.headerElement = createElement({
                 tag: "div",
                 class: "uxTableHeaders",
@@ -327,7 +340,6 @@
             this.headersByName = {};
             this.headers = options.headers || [];
             this.addRows(options.rows);
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
         get rows(){

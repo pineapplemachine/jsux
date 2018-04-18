@@ -128,15 +128,30 @@
                 this.updateSliderGradients();
             }
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            styleElement(this.previewElement, style && style.preview);
-            styleElement(this.previewHexElement, style && style.previewHex);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                preview: this.previewElement,
+                previewHex: this.previewHexElement,
+                redCursor: this.redCursorElement,
+                redSlider: this.redSliderElement,
+                greenCursor: this.greenCursorElement,
+                greenSlider: this.greenSliderElement,
+                blueCursor: this.blueCursorElement,
+                blueSlider: this.blueSliderElement,
+                cursor: [
+                    this.redCursorElement,
+                    this.greenCursorElement,
+                    this.blueCursorElement,
+                ],
+                slider: [
+                    this.redSliderElement,
+                    this.greenSliderElement,
+                    this.blueSliderElement,
+                ],
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             // Preview
             this.previewHexElement = createElement({
                 tag: "div",
@@ -235,8 +250,7 @@
             if(options.value){
                 this.value = options.value;
             }
-            // Apply styles, then all done!
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
     }

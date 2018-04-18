@@ -85,15 +85,14 @@
             // https://stackoverflow.com/a/4075072/4099022
             this.inputElement.blur();
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            styleElement(this.titleElement, style && style.title);
-            styleElement(this.inputElement, style && style.input);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                title: this.titleElement,
+                input: this.inputElement,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.titleElement = createElement({
                 tag: "div",
                 class: "uxTextFieldTitle",
@@ -118,8 +117,7 @@
             this.title = options.title;
             this.placeholder = options.placeholder;
             this.value = options.value || "";
-            // Styling and such
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
     }

@@ -9,12 +9,10 @@
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxColumn",
             });
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }
@@ -32,14 +30,17 @@
         get childContainerElement(){
             return this.rootElement;
         }
+        getChildElement(attribute){
+            return {
+                column: this.children,
+            }[attribute];
+        }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.rootElement = createElement({
                 tag: "div",
                 class: "uxColumns",
             });
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
         updateColumnWidth(){

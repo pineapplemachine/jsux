@@ -103,17 +103,16 @@
         set collapsed(collapsed){
             updateClass("uxSectionCollapsed", collapsed, this.rootElement);
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            styleElement(this.titleElement, style && style.title);
-            styleElement(this.headerElement, style && style.header);
-            styleElement(this.contentElement, style && style.content);
-            styleElement(this.collapseButtonElement, style && style.collapseIcon);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                title: this.titleElement,
+                header: this.headerElement,
+                content: this.contentElement,
+                collapseButton: this.collapseButtonElement,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.collapseButtonElement = createElement({
                 tag: "div",
                 class: "uxSectionCollapseIcon",
@@ -149,8 +148,7 @@
             this.title = options.title;
             this.collapsible = options.collapsible;
             this.collapsed = options.collapsed;
-            // Set style
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
     }

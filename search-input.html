@@ -60,19 +60,16 @@
             return this.textFieldElement.removeEventListener(...args);
         }
         // UxSearchInput
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return this.textFieldElement.getChildElement(attribute);
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.textFieldElement = this.inElementTree(new UxTextField());
             this.textFieldElement.element.classList.add("uxSearchInput");
             this.title = options.title;
             this.placeholder = options.placeholder || "Search...";
             this.value = options.value || "";
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }

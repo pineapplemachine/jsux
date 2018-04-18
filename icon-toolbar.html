@@ -28,39 +28,18 @@
         set src(src){
             this.rootElement.src = src;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
-        }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.title = options.title;
-            this.onleftclick = options.onleftclick;
-            this.onmouseover = options.onmouseover;
-            this.onmouseout = options.onmouseout;
             this.rootElement = createElement({
                 tag: "img",
                 src: options.src,
                 alt: options.title || options.tooltip,
                 class: "uxIconToolbarItem",
-                onleftclick: event => {
-                    if(this.onleftclick){
-                        return this.onleftclick(event);
-                    }
-                },
-                onmouseover: event => {
-                    if(this.onmouseover){
-                        return this.onmouseover(event);
-                    }
-                },
-                onmouseout: event => {
-                    if(this.onmouseout){
-                        return this.onmouseout(event);
-                    }
-                },
+                click: this.getEventHandler("click"),
+                onmouseover: this.getEventHandler("mouseover"),
+                onmouseout: this.getEventHandler("mouseout"),
             });
-            this.setStyle(options.style);
             super.endConstructor(options);
         }
     }
@@ -93,13 +72,14 @@
             }
             `;
         }
-        setStyle(style){
-            styleElement(this.rootElement, style);
-            this.styleObject = style;
+        getChildElement(attribute){
+            return {
+                title: this.itemTitleElement,
+                icon: this.children,
+            }[attribute];
         }
         constructor(options = {}){
             super(options);
-            this.options = options;
             this.itemTitleElement = createElement({
                 tag: "div",
                 class: "uxIconToolbarItemTitle",
@@ -111,18 +91,17 @@
             });
             // Add items
             this.addItems(options.items);
-            // Set style, then all done!
-            this.setStyle(options.style);
+            // All done
             super.endConstructor(options);
         }
         addItem(options){
             const itemElement = new UxIconToolbarItem(options);
-            itemElement.onmouseover = event => {
+            itemElement.addEventListener("mouseover", event => {
                 this.itemTitleElement.innerText = itemElement.title || "";
-            };
-            itemElement.onmouseout = event => {
+            });
+            itemElement.addEventListener("mouseout", event => {
                 this.itemTitleElement.innerText = "";
-            };
+            });
             return this.addOne(itemElement);
         }
     }
