@@ -68,9 +68,9 @@
         addOne(child){
             super.addOne(child);
             child.group = this.group;
-            radio.addEventListener("change", value => {
+            child.addEventListener("change", value => {
                 if(value){
-                    this.selectedItem = radio;
+                    this.selectedItem = child;
                 }else{
                     this.selectedItem = undefined;
                 }

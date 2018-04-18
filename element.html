@@ -135,8 +135,10 @@
                             for(let element of target){
                                 element.setStyle(value);
                             }
-                        }else if(target){
+                        }else if(target instanceof UxElement){
                             target.setStyle(value);
+                        }else if(target){
+                            target.style = value;
                         }else if(this.element){
                             this.element.style[attribute] = value;
                         }
