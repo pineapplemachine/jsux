@@ -257,6 +257,30 @@
         opacity(alpha){
             return new UxColor(this.red, this.green, this.blue, alpha);
         }
+        equals(red, green, blue, alpha = undefined){
+            if(red instanceof UxColor){
+                const color = red;
+                return (
+                    this.red === color.red &&
+                    this.green === color.green &&
+                    this.blue === color.blue && (
+                        this.alpha === color.alpha ||
+                        this.alpha === undefined ||
+                        color.alpha === undefined
+                    )
+                );
+            }else{
+                return (
+                    this.red === red &&
+                    this.green === green &&
+                    this.blue === blue && (
+                        this.alpha === alpha ||
+                        this.alpha === undefined ||
+                        alpha === undefined
+                    )
+                );
+            }
+        }
         constructor(red, green = undefined, blue = undefined, alpha = undefined){
             if(red !== undefined && green === undefined && blue === undefined){
                 const color = red;

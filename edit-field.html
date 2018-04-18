@@ -45,8 +45,11 @@
             return this.currentValue;
         }
         set value(value){
-            this.currentValue = value;
-            this.valueElement.innerText = value;
+            if(value !== this.currentValue){
+                this.currentValue = value;
+                this.valueElement.innerText = value;
+                this.handleEvent("change", value);
+            }
         }
         get title(){
             return this.titleElement.innerText;

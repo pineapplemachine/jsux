@@ -31,17 +31,21 @@
         }
         set value(value){
             const color = new UxColor(value);
+            if(color && color.equals(this.editFieldElement.currentValue)){
+                return;
+            }
             this.editFieldElement.currentValue = color;
             this.editFieldElement.valueElement.innerText = (
                 `${color.hex} ${color.getName()}`
             );
             const button = this.editFieldElement.buttonElement;
             button.element.style.backgroundColor = color;
-            if(color.luma > 0.65){
+            if(color.luma > 0.6){
                 button.element.style.color = "#111";
             }else{
                 button.element.style.color = "#eee";
             }
+            this.handleEvent("change", color);
         }
         get title(){
             return this.editFieldElement.title;
