@@ -1,6 +1,8 @@
-<link rel="import" href="event-spawner.html">
 <link rel="import" href="helpers.html">
 <link rel="import" href="tooltip.html">
+
+<link rel="import" href="element-tree.html">
+<link rel="import" href="event-spawner.html">
 
 <script>
     
@@ -202,16 +204,41 @@
                 this.removeClass(value);
             }
         }
+        get id(){
+            return this.elementId;
+        }
+        set id(value){
+            this.assignManualId(value);
+        }
+        assignManualId(id){
+            this.elementTree.rename(this, this.elementId, id);
+            if(!id) throw new Error();
+            this.elementId = id;
+            this.elementIdAutomatic = false;
+            if(this.element){
+                this.element.id = this.elementId;
+            }
+        }
+        assignAutomaticId(){
+            const autoId = "uxElementAutoId" + UxElement.nextAutoId++;
+            this.elementTree.rename(this, this.elementId, autoId);
+            this.elementId = autoId;
+            this.elementIdAutomatic = true;
+            if(this.element){
+                this.element.id = this.elementId;
+            }
+        }
         constructor(options){
             super();
-            this.id = options.id;
             this.parent = undefined;
             this.parentElement = undefined;
             this.prevSibling = undefined;
             this.nextSibling = undefined;
             this.tooltipObject = undefined;
-            this.elementsById = {};
             this.style = this.getStyleProxy();
+            this.elementTree = new UxElementTree();
+            // TODO: Just broadcast an event for element creation and let
+            // event listeners do their own discriminating
             const ctor = this.constructor;
             if(!UxElement.allElementTypes[ctor.name]){
                 UxElement.allElementTypes[ctor.name] = ctor;
@@ -219,27 +246,38 @@
             }
         }
         endConstructor(options){
-            if(options.hidden){
-                this.hide();
+            // Assign an element ID. If no ID was specified, an ID will be
+            // automatically generated.
+            if(options.id){
+                this.id = options.id;
+            }else{
+                this.assignAutomaticId();
             }
+            // Add the uxElement class to the root DOM element.
             if(this.element){
                 this.element.classList.add("uxElement");
             }
-            if(this.element){
-                this.element.id = options.id;
+            // If the `hidden` option was true, immediately hide the element.
+            if(options.hidden){
+                this.hide();
             }
+            // Immediately add the element to the document body if so specified.
             if(options.addToBody){
                 this.parentElement = document.body;
                 document.body.appendChild(this.element);
             }
+            // Add an initial tooltip if some tooltip content was provided in
+            // the options object.
             if(options.tooltip && this.tooltipTargetElement){
                 this.tooltipObject = new UxTooltip(
                     this.tooltipTargetElement, options.tooltip
                 );
             }
+            // If a style object was provided, immediately apply it.
             if(options.style){
                 this.applyStyle(options.style);
             }
+            // Convenience properties for concisely adding event listeners
             if(options.onleftclick){
                 this.addEventListener("leftclick", options.onleftclick);
             }
@@ -289,43 +327,8 @@
                 this.addEventListener("select", options.onchange);
             }
         }
-        *iterateElementTree(){
-            const stack = [this];
-            while(stack.length){
-                const element = stack.pop();
-                yield element;
-                if(element.children){
-                    for(let child of element.children){
-                        stack.push(child);
-                    }
-                }
-            }
-        }
-        joinElementTree(element){
-            if(element){
-                return element.inElementTree(this);
-            }
-        }
         inElementTree(element){
-            if(!element){
-                return;
-            }
-            if(element.id){
-                this.elementsById[element.id] = element;
-            }
-            if(element.elementsById &&
-                element.elementsById !== this.elementsById
-            ){
-                for(let key in element.elementsById){
-                    this.elementsById[key] = element.elementsById[key];
-                }
-            }
-            element.elementsById = this.elementsById;
-            if(element.children){
-                for(let child of element.children){
-                    this.inElementTree(child);
-                }
-            }
+            this.elementTree.assimilate(element);
             return element;
         }
     }
@@ -340,17 +343,23 @@
         get childContainerElement(){
             return this.rootElement;
         }
-        get find(){
-            return this.elementsById;
+        get tree(){
+            return this.elementTree.elementsById;
         }
         getValueOf(id){
-            const element = this.elementsById && this.elementsById[id];
+            const element = this.elementTree && this.elementTree.get(id);
             return element && element.value;
         }
         getValuesObject(){
             const result = {};
-            for(let attribute in this.elementsById){
-                result[attribute] = this.elementsById[attribute].value;
+            for(let id in this.elementTree.elementsById){
+                const element = this.elementTree.get(id);
+                if(!element.elementIdAutomatic){
+                    const value = element.value;
+                    if(value !== undefined){
+                        result[id] = value;
+                    }
+                }
             }
             return result;
         }
@@ -422,14 +431,14 @@
                 child.parent = undefined;
                 child.stitchSiblings();
                 this.childContainerElement.removeChild(child.element);
-                if(child.id){
-                    delete this.elementsById[child.id];
-                }
+                this.elementTree.remove(child);
             }
         }
     }
     
     UxElement.allElementTypes = {};
     UxElement.newElementTypeListeners = [];
+    
+    UxElement.nextAutoId = 0;
     
 </script>

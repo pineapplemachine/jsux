@@ -186,8 +186,8 @@
                                 style: {float: "left", width: "80px"},
                                 onleftclick: event => {
                                     colorEditPanel.hide();
-                                    panel.find.colorEditField.value = (
-                                        colorEditPanel.find.colorEditPicker.value
+                                    panel.tree.colorEditField.value = (
+                                        colorEditPanel.tree.colorEditPicker.value
                                     );
                                 },
                             })
@@ -234,8 +234,8 @@
                         title: "Choose a color",
                         onedit: event => {
                             colorEditPanel.frontAndCenter();
-                            colorEditPanel.find.colorEditPicker.value = (
-                                panel.find.colorEditField.value
+                            colorEditPanel.tree.colorEditPicker.value = (
+                                panel.tree.colorEditField.value
                             );
                         },
                     }),
@@ -452,11 +452,11 @@
                 // Update the progress bar
                 // (a static progress bar would just be boring...)
                 const updateProgress = () => {
-                    panel.find.progressBar.value = (
-                        panel.find.progressBar.value + 0.0025
+                    panel.tree.progressBar.value = (
+                        panel.tree.progressBar.value + 0.0025
                     );
-                    if(panel.find.progressBar.value > 2){
-                        panel.find.progressBar.value = -2;
+                    if(panel.tree.progressBar.value > 2){
+                        panel.tree.progressBar.value = -2;
                     }
                     setTimeout(updateProgress, 10);
                 };

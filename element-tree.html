@@ -1,0 +1,75 @@
+<script>
+
+    class UxElementTree{
+        constructor(){
+            this.elementsById = {};
+        }
+        get(id){
+            return this.elementsById[id];
+        }
+        contains(element){
+            return element && this.elementsById[element.id] === element;
+        }
+        add(element){
+            if(element && element.id &&
+                this.elementsById[element.id] !== element
+            ){
+                this.assertNewId(element.id);
+                this.elementsById[element.id] = element;
+                element.elementTree = this;
+            }
+        }
+        remove(element){
+            if(element && element.id &&
+                this.elementsById[element.id] === element
+            ){
+                delete this.elementsById[element.id];
+                element.elementTree = undefined;
+            }
+        }
+        rename(element, oldId, newId){
+            if(oldId && this.elementsById[oldId] === element){
+                if(oldId === newId){
+                    return;
+                }
+                delete this.elementsById[oldId];
+            }
+            if(element){
+                if(newId){
+                    this.assertNewId(newId);
+                    this.elementsById[newId] = element;
+                    element.elementTree = this;
+                }else{
+                    element.elementTree = undefined;
+                }
+            }
+        }
+        assimilate(element){
+            if(!element){
+                return;
+            }else if(element.elementTree){
+                if(element.elementTree === this){
+                    return;
+                }
+                const elements = element.elementTree.elementsById;
+                for(let id in elements){
+                    const treeElement = elements[id];
+                    this.add(treeElement);
+                }
+            }else{
+                this.add(element);
+            }
+        }
+        assertNewId(id){
+            if(this.elementsById[id]){
+                throw new Error(`Duplicate element ID "${id}".`);
+            }
+        }
+        *iterateElements(){
+            for(let id in this.elementsById){
+                yield this.elementsById[id];
+            }
+        }
+    }
+    
+</script>
