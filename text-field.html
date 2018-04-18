@@ -81,6 +81,10 @@
         focus(){
             this.inputElement.focus();
         }
+        unfocus(){
+            // https://stackoverflow.com/a/4075072/4099022
+            this.inputElement.blur();
+        }
         setStyle(style){
             styleElement(this.rootElement, style);
             styleElement(this.titleElement, style && style.title);
